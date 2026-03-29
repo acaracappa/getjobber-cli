@@ -10,7 +10,7 @@ query ListClients($first: Int, $after: String) {
       lastName
       companyName
       email
-      phoneNumber
+      phone
       createdAt
       updatedAt
     }
@@ -31,8 +31,8 @@ query GetClient($id: ID!) {
     lastName
     companyName
     email
-    phoneNumber
-    mobileNumber
+    phone
+    phones { nodes { number smsAllowed } }
     billingAddress {
       street1
       street2
@@ -57,7 +57,7 @@ query SearchClients($query: String!, $first: Int) {
       lastName
       companyName
       email
-      phoneNumber
+      phone
     }
     totalCount
   }

@@ -32,7 +32,7 @@ def create_client(access_token: str, api_url: str = API_BASE_URL) -> Client:
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
-            "X-API-Version": "2017-01-26",  # GetJobber API version
+            "X-JOBBER-GRAPHQL-VERSION": "2025-04-16",
         },
         timeout=DEFAULT_TIMEOUT,
         verify=True,
