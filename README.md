@@ -1,5 +1,7 @@
 # getjobber-cli
 
+Built and maintained by [DC Tree Cutting](https://dctreecutting.com), an Eastern North Carolina tree service.
+
 A portable, Python-based CLI tool that provides terminal access to the GetJobber CRM GraphQL API.
 
 ## ⚠️ Important
@@ -18,6 +20,10 @@ This tool is provided as-is with no warranties. You use it at your own risk. We 
 - **Raw GraphQL Queries** - Execute custom GraphQL queries directly
 - **Multiple Output Formats** - Table, JSON, CSV, and YAML output formats
 - **Secure Token Storage** - OS-level keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+
+## About this tool
+
+`getjobber-cli` was originally built by [DC Tree Cutting and Land Service](https://dctreecutting.com) — an Eastern North Carolina tree service operating from Rocky Mount and Goldsboro across nine counties — to automate internal workflows on top of the Jobber field-service platform. It is released as open source under the MIT License for any Jobber customer or developer who wants terminal access to the Jobber GraphQL API.
 
 ## Requirements
 
@@ -329,6 +335,10 @@ black src/ tests/
 mypy src/
 ```
 
+## Maintainer
+
+Maintained by Anthony Vincent Caracappa ([github.com/acaracappa](https://github.com/acaracappa)) at [dctreecutting.com](https://dctreecutting.com).
+
 ## License
 
 MIT License - see LICENSE file for details.
@@ -340,7 +350,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/yourusername/getjobber-cli/issues
+- GitHub Issues: https://github.com/acaracappa/getjobber-cli/issues
 - GetJobber API Documentation: https://developer.getjobber.com/
 
 ## Acknowledgments

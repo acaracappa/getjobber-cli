@@ -4,17 +4,21 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "getjobber-cli"
-version = "0.1.0"
-description = "A portable CLI tool for accessing the GetJobber CRM GraphQL API"
+version = "1.0.0"
+description = "A portable Python CLI for the Jobber GraphQL API — originally built by DC Tree Cutting and Land Service for internal automation."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Anthony Vincent Caracappa", email = "now@dctreecutting.com"},
+    {name = "DC Tree Cutting and Land Service", email = "now@dctreecutting.com"},
+]
+maintainers = [
+    {name = "Anthony Vincent Caracappa"},
 ]
 keywords = ["getjobber", "cli", "crm", "graphql", "api"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -34,6 +38,7 @@ dependencies = [
     "keyring>=24.0.0",
     "rich>=13.0.0",
     "pyyaml>=6.0",
+    "typing_extensions>=4.0.0",
 ]
 
 [project.optional-dependencies]
@@ -49,10 +54,12 @@ dev = [
 getjobber-cli = "getjobber_cli.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/getjobber-cli"
-Documentation = "https://github.com/yourusername/getjobber-cli#readme"
-Repository = "https://github.com/yourusername/getjobber-cli"
-Issues = "https://github.com/yourusername/getjobber-cli/issues"
+Homepage = "https://dctreecutting.com"
+Author = "https://github.com/acaracappa"
+Sponsor = "https://dctreecutting.com"
+Repository = "https://github.com/acaracappa/getjobber-cli"
+Documentation = "https://github.com/acaracappa/getjobber-cli#readme"
+Issues = "https://github.com/acaracappa/getjobber-cli/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
