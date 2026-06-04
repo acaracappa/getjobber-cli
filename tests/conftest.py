@@ -63,3 +63,65 @@ def sample_job_data():
             "lastName": "Doe",
         },
     }
+
+
+@pytest.fixture
+def sample_quote_data():
+    """Sample quote data."""
+    return {
+        "id": "789",
+        "quoteNumber": "Q-001",
+        "title": "Test Quote",
+        "status": "draft",
+        "totalAmount": "100.00",
+    }
+
+
+@pytest.fixture
+def sample_invoice_data():
+    """Sample invoice data."""
+    return {
+        "id": "999",
+        "invoiceNumber": "INV-001",
+        "subject": "Test Invoice",
+        "status": "unpaid",
+        "totalAmount": "200.00",
+        "balance": "200.00",
+    }
+
+
+@pytest.fixture
+def mock_authenticated_token_manager(mock_token_manager, monkeypatch):
+    """Patch get_token_manager across command modules to return an
+    authenticated mock token manager.
+    """
+    targets = [
+        "getjobber_cli.commands.client_commands.get_token_manager",
+        "getjobber_cli.commands.job_commands.get_token_manager",
+        "getjobber_cli.commands.quote_commands.get_token_manager",
+        "getjobber_cli.commands.invoice_commands.get_token_manager",
+        "getjobber_cli.commands.auth_commands.get_token_manager",
+    ]
+    for target in targets:
+        try:
+            monkeypatch.setattr(target, lambda tm=mock_token_manager: tm)
+        except (AttributeError, ImportError):
+            pass
+    return mock_token_manager
+
+
+@pytest.fixture
+def mock_graphql_client_factory(monkeypatch, mock_graphql_client):
+    """Patch GraphQLClient construction across command modules to return a mock."""
+    targets = [
+        "getjobber_cli.commands.client_commands.GraphQLClient",
+        "getjobber_cli.commands.job_commands.GraphQLClient",
+        "getjobber_cli.commands.quote_commands.GraphQLClient",
+        "getjobber_cli.commands.invoice_commands.GraphQLClient",
+    ]
+    for target in targets:
+        try:
+            monkeypatch.setattr(target, lambda *a, **kw: mock_graphql_client)
+        except (AttributeError, ImportError):
+            pass
+    return mock_graphql_client

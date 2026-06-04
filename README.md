@@ -1,8 +1,30 @@
 # getjobber-cli
 
+[![PyPI version](https://img.shields.io/pypi/v/getjobber-cli.svg)](https://pypi.org/project/getjobber-cli/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Python versions](https://img.shields.io/pypi/pyversions/getjobber-cli.svg)](https://pypi.org/project/getjobber-cli/) [![CI](https://github.com/acaracappa/getjobber-cli/actions/workflows/test.yml/badge.svg)](https://github.com/acaracappa/getjobber-cli/actions/workflows/test.yml)
+
 Built and maintained by [DC Tree Cutting](https://dctreecutting.com), an Eastern North Carolina tree service.
 
 A portable, Python-based CLI tool that provides terminal access to the GetJobber CRM GraphQL API.
+
+## Table of Contents
+
+- [⚠️ Important](#-important)
+- [Features](#features)
+- [About this tool](#about-this-tool)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Command Reference](#command-reference)
+- [Output Formats](#output-formats)
+- [Configuration](#configuration)
+- [Token Storage](#token-storage)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Maintainer](#maintainer)
+- [License](#license)
+- [Contributing](#contributing)
+- [Support](#support)
+- [Acknowledgments](#acknowledgments)
 
 ## ⚠️ Important
 
