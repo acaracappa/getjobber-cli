@@ -70,6 +70,8 @@ def list_quotes(
     except GraphQLError as e:
         print_error(f"Failed to list quotes: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -94,6 +96,8 @@ def get_quote(quote_id: Annotated[str, typer.Argument(help="Quote ID")]):
     except GraphQLError as e:
         print_error(f"Failed to get quote: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -131,6 +135,8 @@ def create_quote(
     except GraphQLError as e:
         print_error(f"Failed to create quote: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -166,6 +172,8 @@ def send_quote(
     except GraphQLError as e:
         print_error(f"Failed to send quote: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -194,6 +202,8 @@ def approve_quote(
     except GraphQLError as e:
         print_error(f"Failed to approve quote: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)

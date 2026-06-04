@@ -26,7 +26,7 @@ def create_client(access_token: str, api_url: str = API_BASE_URL) -> Client:
         raise NotAuthenticatedError()
 
     # Configure transport with authentication
-    # Note: GetJobber API requires X-API-Version header
+    # Jobber requires X-JOBBER-GRAPHQL-VERSION; pin to a known stable schema date
     transport = RequestsHTTPTransport(
         url=api_url,
         headers={

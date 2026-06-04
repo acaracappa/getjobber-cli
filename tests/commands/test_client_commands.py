@@ -191,10 +191,7 @@ class TestSearchClients:
         gql, _ = fake_client
         gql.query.return_value = {"clients": {"nodes": []}}
         result = runner.invoke(app, ["search", "nobody"])
-        # NOTE: source uses raise typer.Exit(0) inside a try-block whose
-        # broad `except Exception as e` re-raises Exit(1). This test
-        # captures the current (buggy) behavior so coverage stays honest.
-        assert result.exit_code == 1
+        assert result.exit_code == 0
 
 
 class TestDeleteClient:
@@ -209,9 +206,7 @@ class TestDeleteClient:
 
     def test_cancel_without_force(self, app, fake_client):
         result = runner.invoke(app, ["delete", "1"], input="n\n")
-        # NOTE: source uses raise typer.Exit(0) inside the same try
-        # block; same swallowing-by-broad-except bug -> exits with 1.
-        assert result.exit_code == 1
+        assert result.exit_code == 0
         gql, _ = fake_client
         gql.mutate.assert_not_called()
 

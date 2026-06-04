@@ -162,8 +162,7 @@ class TestSendInvoice:
     def test_cancel_without_force(self, app, fake_client):
         gql, _ = fake_client
         result = runner.invoke(app, ["send", "1"], input="n\n")
-        # NOTE: typer.Exit(0) gets swallowed by broad except.
-        assert result.exit_code == 1
+        assert result.exit_code == 0
         gql.mutate.assert_not_called()
 
     def test_user_errors(self, app, fake_client):

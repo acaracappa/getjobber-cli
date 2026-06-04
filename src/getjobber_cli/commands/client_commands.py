@@ -77,6 +77,8 @@ def list_clients(
     except GraphQLError as e:
         print_error(f"Failed to list clients: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -108,6 +110,8 @@ def get_client(
     except GraphQLError as e:
         print_error(f"Failed to get client: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -175,6 +179,8 @@ def create_client(
     except GraphQLError as e:
         print_error(f"Failed to create client: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -233,6 +239,8 @@ def update_client(
     except GraphQLError as e:
         print_error(f"Failed to update client: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -271,6 +279,8 @@ def delete_client(
     except GraphQLError as e:
         print_error(f"Failed to delete client: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -318,6 +328,8 @@ def search_clients(
     except GraphQLError as e:
         print_error(f"Failed to search clients: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)

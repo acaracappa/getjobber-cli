@@ -31,7 +31,7 @@ class TestCreateClient:
         # The transport should carry the Authorization header
         headers = c.transport.headers
         assert headers["Authorization"] == "Bearer my_token"
-        assert headers["X-API-Version"] == "2017-01-26"
+        assert headers["X-JOBBER-GRAPHQL-VERSION"] == "2025-04-16"
         assert headers["Content-Type"] == "application/json"
 
 

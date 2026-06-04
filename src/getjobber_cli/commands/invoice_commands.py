@@ -74,6 +74,8 @@ def list_invoices(
     except GraphQLError as e:
         print_error(f"Failed to list invoices: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -98,6 +100,8 @@ def get_invoice(invoice_id: Annotated[str, typer.Argument(help="Invoice ID")]):
     except GraphQLError as e:
         print_error(f"Failed to get invoice: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -144,6 +148,8 @@ def create_invoice(
     except GraphQLError as e:
         print_error(f"Failed to create invoice: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -179,6 +185,8 @@ def send_invoice(
     except GraphQLError as e:
         print_error(f"Failed to send invoice: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)

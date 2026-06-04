@@ -136,9 +136,7 @@ class TestSendQuote:
     def test_cancel_without_force(self, app, fake_client):
         gql, _ = fake_client
         result = runner.invoke(app, ["send", "1"], input="n\n")
-        # NOTE: source uses raise typer.Exit(0) inside try/except Exception,
-        # which gets re-raised as exit_code=1. This captures actual behavior.
-        assert result.exit_code == 1
+        assert result.exit_code == 0
         gql.mutate.assert_not_called()
 
     def test_user_errors(self, app, fake_client):
