@@ -39,24 +39,25 @@ def mock_graphql_client():
 
 @pytest.fixture
 def sample_client_data():
-    """Sample client data."""
+    """Sample client data (current Jobber schema)."""
     return {
         "id": "123",
         "firstName": "John",
         "lastName": "Doe",
         "email": "john@example.com",
-        "phoneNumber": "555-1234",
+        "phone": "555-1234",
     }
 
 
 @pytest.fixture
 def sample_job_data():
-    """Sample job data."""
+    """Sample job data (current Jobber schema)."""
     return {
         "id": "456",
         "title": "Test Job",
         "jobNumber": "JOB-001",
-        "status": "active",
+        "jobStatus": "active",
+        "total": 100.0,
         "client": {
             "id": "123",
             "firstName": "John",
@@ -67,26 +68,25 @@ def sample_job_data():
 
 @pytest.fixture
 def sample_quote_data():
-    """Sample quote data."""
+    """Sample quote data (current Jobber schema)."""
     return {
         "id": "789",
         "quoteNumber": "Q-001",
         "title": "Test Quote",
-        "status": "draft",
-        "totalAmount": "100.00",
+        "quoteStatus": "draft",
+        "amounts": {"total": 100.0},
     }
 
 
 @pytest.fixture
 def sample_invoice_data():
-    """Sample invoice data."""
+    """Sample invoice data (current Jobber schema)."""
     return {
         "id": "999",
         "invoiceNumber": "INV-001",
         "subject": "Test Invoice",
-        "status": "unpaid",
-        "totalAmount": "200.00",
-        "balance": "200.00",
+        "invoiceStatus": "awaiting_payment",
+        "amounts": {"total": 200.0, "paymentsTotal": 0.0, "invoiceBalance": 200.0},
     }
 
 

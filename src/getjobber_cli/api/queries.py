@@ -1,4 +1,11 @@
-"""Pre-built GraphQL queries for GetJobber API."""
+"""Pre-built GraphQL queries for GetJobber API.
+
+Field selections target the pinned schema version in api/client.py
+(X-JOBBER-GRAPHQL-VERSION). Money now lives under `amounts { ... }`, statuses
+are typed enums (invoiceStatus / quoteStatus / jobStatus), and related records
+are connections (jobs.nodes, properties.nodes) rather than the old *Ids / *Amount
+scalar fields. See CHANGELOG 1.1.0.
+"""
 
 # Client Queries
 LIST_CLIENTS = """
@@ -11,6 +18,8 @@ query ListClients($first: Int, $after: String) {
       companyName
       email
       phone
+      isCompany
+      isLead
       createdAt
       updatedAt
     }
@@ -24,7 +33,7 @@ query ListClients($first: Int, $after: String) {
 """
 
 GET_CLIENT = """
-query GetClient($id: ID!) {
+query GetClient($id: EncodedId!) {
   client(id: $id) {
     id
     firstName
@@ -32,7 +41,7 @@ query GetClient($id: ID!) {
     companyName
     email
     phone
-    phones { nodes { number smsAllowed } }
+    phones { number primary smsAllowed }
     billingAddress {
       street1
       street2
@@ -41,7 +50,13 @@ query GetClient($id: ID!) {
       postalCode
       country
     }
-    tags
+    isCompany
+    isLead
+    tags {
+      nodes {
+        label
+      }
+    }
     createdAt
     updatedAt
   }
@@ -50,7 +65,7 @@ query GetClient($id: ID!) {
 
 SEARCH_CLIENTS = """
 query SearchClients($query: String!, $first: Int) {
-  clients(first: $first, filter: {search: $query}) {
+  clients(first: $first, searchTerm: $query) {
     nodes {
       id
       firstName
@@ -66,13 +81,13 @@ query SearchClients($query: String!, $first: Int) {
 
 # Job Queries
 LIST_JOBS = """
-query ListJobs($first: Int, $after: String, $status: String) {
+query ListJobs($first: Int, $after: String, $status: JobStatusTypeEnum) {
   jobs(first: $first, after: $after, filter: {status: $status}) {
     nodes {
       id
       title
       jobNumber
-      status
+      jobStatus
       client {
         id
         firstName
@@ -81,6 +96,7 @@ query ListJobs($first: Int, $after: String, $status: String) {
       }
       startAt
       endAt
+      total
       createdAt
       updatedAt
     }
@@ -94,13 +110,13 @@ query ListJobs($first: Int, $after: String, $status: String) {
 """
 
 GET_JOB = """
-query GetJob($id: ID!) {
+query GetJob($id: EncodedId!) {
   job(id: $id) {
     id
     title
     jobNumber
-    status
-    description
+    jobStatus
+    instructions
     client {
       id
       firstName
@@ -120,7 +136,7 @@ query GetJob($id: ID!) {
     }
     startAt
     endAt
-    totalAmount
+    total
     createdAt
     updatedAt
   }
@@ -129,21 +145,22 @@ query GetJob($id: ID!) {
 
 # Quote Queries
 LIST_QUOTES = """
-query ListQuotes($first: Int, $after: String, $status: String) {
+query ListQuotes($first: Int, $after: String, $status: QuoteStatusTypeEnum) {
   quotes(first: $first, after: $after, filter: {status: $status}) {
     nodes {
       id
       quoteNumber
       title
-      status
+      quoteStatus
       client {
         id
         firstName
         lastName
         companyName
       }
-      totalAmount
-      sentAt
+      amounts {
+        total
+      }
       createdAt
       updatedAt
     }
@@ -157,12 +174,12 @@ query ListQuotes($first: Int, $after: String, $status: String) {
 """
 
 GET_QUOTE = """
-query GetQuote($id: ID!) {
+query GetQuote($id: EncodedId!) {
   quote(id: $id) {
     id
     quoteNumber
     title
-    status
+    quoteStatus
     message
     client {
       id
@@ -172,17 +189,21 @@ query GetQuote($id: ID!) {
       email
     }
     lineItems {
-      id
-      name
-      description
-      quantity
-      unitPrice
+      nodes {
+        id
+        name
+        description
+        quantity
+        unitPrice
+        totalPrice
+      }
+    }
+    amounts {
+      subtotal
+      discountAmount
+      taxAmount
       total
     }
-    subtotal
-    taxAmount
-    totalAmount
-    sentAt
     createdAt
     updatedAt
   }
@@ -191,24 +212,26 @@ query GetQuote($id: ID!) {
 
 # Invoice Queries
 LIST_INVOICES = """
-query ListInvoices($first: Int, $after: String, $status: String) {
+query ListInvoices($first: Int, $after: String, $status: InvoiceStatusTypeEnum) {
   invoices(first: $first, after: $after, filter: {status: $status}) {
     nodes {
       id
       invoiceNumber
       subject
-      status
+      invoiceStatus
       client {
         id
         firstName
         lastName
         companyName
       }
-      totalAmount
-      amountPaid
-      balance
+      amounts {
+        total
+        paymentsTotal
+        invoiceBalance
+      }
       dueDate
-      sentAt
+      issuedDate
       createdAt
       updatedAt
     }
@@ -222,12 +245,12 @@ query ListInvoices($first: Int, $after: String, $status: String) {
 """
 
 GET_INVOICE = """
-query GetInvoice($id: ID!) {
+query GetInvoice($id: EncodedId!) {
   invoice(id: $id) {
     id
     invoiceNumber
     subject
-    status
+    invoiceStatus
     message
     client {
       id
@@ -236,27 +259,33 @@ query GetInvoice($id: ID!) {
       companyName
       email
     }
-    job {
-      id
-      title
-      jobNumber
+    jobs {
+      nodes {
+        id
+        title
+        jobNumber
+      }
     }
     lineItems {
-      id
-      name
-      description
-      quantity
-      unitPrice
+      nodes {
+        id
+        name
+        description
+        quantity
+        unitPrice
+        totalPrice
+      }
+    }
+    amounts {
+      subtotal
+      discountAmount
+      taxAmount
+      paymentsTotal
+      invoiceBalance
       total
     }
-    subtotal
-    taxAmount
-    totalAmount
-    amountPaid
-    balance
     dueDate
-    sentAt
-    paidAt
+    issuedDate
     createdAt
     updatedAt
   }

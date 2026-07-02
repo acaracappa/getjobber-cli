@@ -99,78 +99,12 @@ class TestGetJob:
         assert result.exit_code == 1
 
 
-class TestCreateJob:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobCreate": {
-                "job": {"id": "1", "title": "New job"},
-                "userErrors": [],
-            }
-        }
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1", "--title", "New job"]
-        )
-        assert result.exit_code == 0
+class TestWriteCommandsGated:
+    """Write commands are gated pending the v1.2.0 write redesign."""
 
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobCreate": {
-                "job": None,
-                "userErrors": [{"path": "title", "message": "required"}],
-            }
-        }
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1", "--title", "x"]
-        )
-        assert result.exit_code == 1
-
-    def test_interactive_prompt(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobCreate": {
-                "job": {"id": "1"},
-                "userErrors": [],
-            }
-        }
-        # Title then description
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1"], input="MyTitle\nDesc\n"
-        )
-        assert result.exit_code == 0
-
-
-class TestUpdateJob:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobUpdate": {"job": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["update", "1", "--title", "x"])
-        assert result.exit_code == 0
-
-    def test_no_fields_fails(self, app, fake_client):
-        result = runner.invoke(app, ["update", "1"])
-        assert result.exit_code == 1
-
-
-class TestCompleteJob:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobComplete": {"job": {"id": "1", "status": "complete"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["complete", "1"])
-        assert result.exit_code == 0
-
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "jobComplete": {
-                "job": None,
-                "userErrors": [{"path": "id", "message": "bad"}],
-            }
-        }
-        result = runner.invoke(app, ["complete", "1"])
-        assert result.exit_code == 1
+    @pytest.mark.parametrize("fn_name", ['create_job', 'update_job', 'complete_job'])
+    def test_gated(self, fn_name):
+        fn = getattr(job_commands, fn_name)
+        with pytest.raises(typer.Exit) as exc:
+            fn()
+        assert exc.value.exit_code == 2

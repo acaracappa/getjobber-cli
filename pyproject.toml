@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "getjobber-cli"
-version = "1.0.0"
+version = "1.1.0"
 description = "A portable Python CLI for the Jobber GraphQL API — originally built by DC Tree Cutting and Land Service for internal automation."
 readme = "README.md"
 requires-python = ">=3.10"
