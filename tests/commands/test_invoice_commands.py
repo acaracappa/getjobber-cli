@@ -46,41 +46,45 @@ def unauthenticated(monkeypatch):
     return mock_tm
 
 
+def _invoice(num, balance, status="awaiting_payment"):
+    return {
+        "id": f"i{num}",
+        "invoiceNumber": f"INV-{num}",
+        "subject": "S",
+        "invoiceStatus": status,
+        "amounts": {"total": 200.0, "paymentsTotal": 200.0 - balance, "invoiceBalance": balance},
+    }
+
+
 class TestListInvoices:
     def test_happy_path(self, app, fake_client):
         gql, _ = fake_client
-        gql.query.return_value = {
-            "invoices": {
-                "nodes": [
-                    {
-                        "id": "i1",
-                        "invoiceNumber": "INV-1",
-                        "subject": "S",
-                        "status": "unpaid",
-                        "totalAmount": "200",
-                        "balance": "200",
-                    }
-                ]
-            }
-        }
+        gql.query.return_value = {"invoices": {"nodes": [_invoice(1, 200.0)]}}
         result = runner.invoke(app, ["list"])
         assert result.exit_code == 0
 
-    def test_unpaid_flag(self, app, fake_client):
+    def test_unpaid_flag_filters_client_side(self, app, fake_client):
+        # --unpaid no longer sends a server status filter; it filters by balance.
         gql, _ = fake_client
-        gql.query.return_value = {"invoices": {"nodes": []}}
-        result = runner.invoke(app, ["list", "--unpaid"])
+        gql.query.return_value = {
+            "invoices": {"nodes": [_invoice(1, 0.0, "paid"), _invoice(2, 200.0)]}
+        }
+        result = runner.invoke(app, ["list", "--unpaid", "--format", "json"])
         assert result.exit_code == 0
         _, kwargs = gql.query.call_args
-        assert kwargs["variables"]["status"] == "UNPAID"
+        # no bogus "UNPAID" status variable is passed to the API
+        assert kwargs["variables"].get("status") != "UNPAID"
+        # paid invoice (balance 0) filtered out, unpaid kept
+        assert "INV-2" in result.output
+        assert "INV-1" not in result.output
 
     def test_status_filter(self, app, fake_client):
         gql, _ = fake_client
         gql.query.return_value = {"invoices": {"nodes": []}}
-        result = runner.invoke(app, ["list", "--status", "PAID"])
+        result = runner.invoke(app, ["list", "--status", "paid"])
         assert result.exit_code == 0
         _, kwargs = gql.query.call_args
-        assert kwargs["variables"]["status"] == "PAID"
+        assert kwargs["variables"]["status"] == "paid"
 
     def test_json_format(self, app, fake_client):
         gql, _ = fake_client
@@ -107,71 +111,21 @@ class TestGetInvoice:
         assert result.exit_code == 1
 
 
-class TestCreateInvoice:
-    def test_from_job(self, app, fake_client):
+class TestWriteCommandsGated:
+    """Write commands are gated pending the v1.2.0 write redesign."""
+
+    @pytest.mark.parametrize(
+        "argv",
+        [
+            ["create", "--job-id", "j1", "--subject", "S"],
+            ["create", "--client-id", "c1", "--subject", "S"],
+            ["send", "1", "--force"],
+        ],
+    )
+    def test_gated(self, app, fake_client, argv):
         gql, _ = fake_client
-        gql.mutate.return_value = {
-            "invoiceCreate": {"invoice": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(
-            app, ["create", "--job-id", "j1", "--subject", "S"]
-        )
-        assert result.exit_code == 0
-        _, kwargs = gql.mutate.call_args
-        assert kwargs["variables"]["input"]["jobId"] == "j1"
-
-    def test_from_client(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "invoiceCreate": {"invoice": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1", "--subject", "S"]
-        )
-        assert result.exit_code == 0
-        _, kwargs = gql.mutate.call_args
-        assert kwargs["variables"]["input"]["clientId"] == "c1"
-
-    def test_missing_both_ids_fails(self, app, fake_client):
-        result = runner.invoke(app, ["create", "--subject", "S"])
-        assert result.exit_code == 1
-
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "invoiceCreate": {
-                "invoice": None,
-                "userErrors": [{"path": "subject", "message": "required"}],
-            }
-        }
-        result = runner.invoke(
-            app, ["create", "--job-id", "j1", "--subject", "x"]
-        )
-        assert result.exit_code == 1
-
-
-class TestSendInvoice:
-    def test_happy_path_force(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "invoiceSend": {"invoice": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["send", "1", "--force"])
-        assert result.exit_code == 0
-
-    def test_cancel_without_force(self, app, fake_client):
-        gql, _ = fake_client
-        result = runner.invoke(app, ["send", "1"], input="n\n")
-        assert result.exit_code == 0
+        result = runner.invoke(app, argv)
+        assert result.exit_code == 2
+        assert "temporarily disabled" in result.output
+        # gating short-circuits before any network call
         gql.mutate.assert_not_called()
-
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "invoiceSend": {
-                "invoice": None,
-                "userErrors": [{"path": "id", "message": "bad"}],
-            }
-        }
-        result = runner.invoke(app, ["send", "1", "--force"])
-        assert result.exit_code == 1

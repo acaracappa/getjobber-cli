@@ -12,6 +12,7 @@ from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.config import get_config
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
+from getjobber_cli.utils.gating import write_command_pending
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -62,7 +63,7 @@ def list_clients(
                     "Name": f"{c.get('firstName', '')} {c.get('lastName', '')}".strip()
                     or c.get("companyName", ""),
                     "Email": c.get("email", ""),
-                    "Phone": c.get("phoneNumber", ""),
+                    "Phone": c.get("phone", ""),
                 }
                 for c in clients
             ]
@@ -117,6 +118,7 @@ def get_client(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def create_client(
     first_name: Annotated[Optional[str], typer.Option(help="First name")] = None,
     last_name: Annotated[Optional[str], typer.Option(help="Last name")] = None,
@@ -186,6 +188,7 @@ def create_client(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def update_client(
     client_id: Annotated[str, typer.Argument(help="Client ID")],
     first_name: Annotated[Optional[str], typer.Option(help="First name")] = None,
@@ -246,6 +249,7 @@ def update_client(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def delete_client(
     client_id: Annotated[str, typer.Argument(help="Client ID")],
     force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False,
@@ -313,7 +317,7 @@ def search_clients(
                     "Name": f"{c.get('firstName', '')} {c.get('lastName', '')}".strip()
                     or c.get("companyName", ""),
                     "Email": c.get("email", ""),
-                    "Phone": c.get("phoneNumber", ""),
+                    "Phone": c.get("phone", ""),
                 }
                 for c in clients
             ]

@@ -99,68 +99,12 @@ class TestGetQuote:
         assert result.exit_code == 1
 
 
-class TestCreateQuote:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteCreate": {"quote": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1", "--title", "MyTitle"]
-        )
-        assert result.exit_code == 0
+class TestWriteCommandsGated:
+    """Write commands are gated pending the v1.2.0 write redesign."""
 
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteCreate": {
-                "quote": None,
-                "userErrors": [{"path": "title", "message": "required"}],
-            }
-        }
-        result = runner.invoke(
-            app, ["create", "--client-id", "c1", "--title", "x"]
-        )
-        assert result.exit_code == 1
-
-
-class TestSendQuote:
-    def test_happy_path_force(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteSend": {"quote": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["send", "1", "--force"])
-        assert result.exit_code == 0
-
-    def test_cancel_without_force(self, app, fake_client):
-        gql, _ = fake_client
-        result = runner.invoke(app, ["send", "1"], input="n\n")
-        assert result.exit_code == 0
-        gql.mutate.assert_not_called()
-
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteSend": {"quote": None, "userErrors": [{"path": "id", "message": "bad"}]}
-        }
-        result = runner.invoke(app, ["send", "1", "--force"])
-        assert result.exit_code == 1
-
-
-class TestApproveQuote:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteApprove": {"quote": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["approve", "1"])
-        assert result.exit_code == 0
-
-    def test_user_errors(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "quoteApprove": {"quote": None, "userErrors": [{"path": "id", "message": "bad"}]}
-        }
-        result = runner.invoke(app, ["approve", "1"])
-        assert result.exit_code == 1
+    @pytest.mark.parametrize("fn_name", ['create_quote', 'send_quote', 'approve_quote'])
+    def test_gated(self, fn_name):
+        fn = getattr(quote_commands, fn_name)
+        with pytest.raises(typer.Exit) as exc:
+            fn()
+        assert exc.value.exit_code == 2

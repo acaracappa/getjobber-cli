@@ -11,6 +11,7 @@ from getjobber_cli.api.queries import GET_INVOICE, LIST_INVOICES
 from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
+from getjobber_cli.utils.gating import write_command_pending
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -43,13 +44,17 @@ def list_invoices(
         client = _get_authenticated_client()
 
         variables = {"first": limit}
-        if unpaid:
-            variables["status"] = "UNPAID"
-        elif status:
+        # `status` maps to InvoiceStatusTypeEnum (draft, awaiting_payment, paid,
+        # past_due, bad_debt, sent_not_due). There is no single "unpaid" status,
+        # so --unpaid is applied client-side by outstanding balance.
+        if status:
             variables["status"] = status
 
         result = client.query(LIST_INVOICES, variables=variables)
         invoices = extract_list_data(result, "invoices")
+
+        if unpaid:
+            invoices = [i for i in invoices if ((i.get("amounts") or {}).get("invoiceBalance") or 0) > 0]
 
         if format == OUTPUT_FORMAT_TABLE:
             simplified = [
@@ -57,9 +62,9 @@ def list_invoices(
                     "ID": i.get("id", ""),
                     "Number": i.get("invoiceNumber", ""),
                     "Subject": i.get("subject", ""),
-                    "Status": i.get("status", ""),
-                    "Total": i.get("totalAmount", ""),
-                    "Balance": i.get("balance", ""),
+                    "Status": i.get("invoiceStatus", ""),
+                    "Total": (i.get("amounts") or {}).get("total", ""),
+                    "Balance": (i.get("amounts") or {}).get("invoiceBalance", ""),
                 }
                 for i in invoices
             ]
@@ -107,6 +112,7 @@ def get_invoice(invoice_id: Annotated[str, typer.Argument(help="Invoice ID")]):
         raise typer.Exit(1)
 
 
+@write_command_pending
 def create_invoice(
     job_id: Annotated[Optional[str], typer.Option(help="Job ID")] = None,
     client_id: Annotated[Optional[str], typer.Option(help="Client ID")] = None,
@@ -155,6 +161,7 @@ def create_invoice(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def send_invoice(
     invoice_id: Annotated[str, typer.Argument(help="Invoice ID")],
     force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False,

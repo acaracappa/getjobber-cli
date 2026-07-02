@@ -11,6 +11,7 @@ from getjobber_cli.api.queries import GET_JOB, LIST_JOBS
 from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
+from getjobber_cli.utils.gating import write_command_pending
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -58,7 +59,7 @@ def list_jobs(
                     "ID": j.get("id", ""),
                     "Number": j.get("jobNumber", ""),
                     "Title": j.get("title", ""),
-                    "Status": j.get("status", ""),
+                    "Status": j.get("jobStatus", ""),
                     "Client": j.get("client", {}).get("companyName")
                     or f"{j.get('client', {}).get('firstName', '')} {j.get('client', {}).get('lastName', '')}".strip(),
                 }
@@ -111,6 +112,7 @@ def get_job(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def create_job(
     client_id: Annotated[str, typer.Option(help="Client ID (required)")],
     title: Annotated[Optional[str], typer.Option(help="Job title")] = None,
@@ -162,6 +164,7 @@ def create_job(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def update_job(
     job_id: Annotated[str, typer.Argument(help="Job ID")],
     title: Annotated[Optional[str], typer.Option(help="Job title")] = None,
@@ -214,6 +217,7 @@ def update_job(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def complete_job(
     job_id: Annotated[str, typer.Argument(help="Job ID")],
 ):

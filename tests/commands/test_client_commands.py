@@ -107,67 +107,6 @@ class TestGetClient:
         assert result.exit_code == 1
 
 
-class TestCreateClient:
-    def test_happy_path_with_flags(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientCreate": {
-                "client": {"id": "1", "firstName": "John"},
-                "userErrors": [],
-            }
-        }
-        result = runner.invoke(
-            app,
-            ["create", "--first-name", "John", "--last-name", "Doe"],
-        )
-        assert result.exit_code == 0
-        gql.mutate.assert_called_once()
-
-    def test_user_errors_returned(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientCreate": {
-                "client": None,
-                "userErrors": [{"path": "email", "message": "invalid"}],
-            }
-        }
-        result = runner.invoke(app, ["create", "--first-name", "X"])
-        assert result.exit_code == 1
-
-    def test_interactive_mode_invokes_prompts(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientCreate": {
-                "client": {"id": "5", "firstName": "Jane"},
-                "userErrors": [],
-            }
-        }
-        # Provide answers for the interactive prompts in order
-        result = runner.invoke(
-            app,
-            ["create"],
-            input="Jane\nDoe\n\n\n\n",
-        )
-        assert result.exit_code == 0
-
-
-class TestUpdateClient:
-    def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientUpdate": {
-                "client": {"id": "1", "firstName": "Updated"},
-                "userErrors": [],
-            }
-        }
-        result = runner.invoke(app, ["update", "1", "--first-name", "Updated"])
-        assert result.exit_code == 0
-
-    def test_no_fields_provided_fails(self, app, fake_client):
-        result = runner.invoke(app, ["update", "1"])
-        assert result.exit_code == 1
-
-
 class TestSearchClients:
     def test_happy_path(self, app, fake_client):
         gql, _ = fake_client
@@ -194,29 +133,12 @@ class TestSearchClients:
         assert result.exit_code == 0
 
 
-class TestDeleteClient:
-    def test_happy_path_force(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientArchive": {"client": {"id": "1"}, "userErrors": []}
-        }
-        result = runner.invoke(app, ["delete", "1", "--force"])
-        assert result.exit_code == 0
-        gql.mutate.assert_called_once()
+class TestWriteCommandsGated:
+    """Write commands are gated pending the v1.2.0 write redesign."""
 
-    def test_cancel_without_force(self, app, fake_client):
-        result = runner.invoke(app, ["delete", "1"], input="n\n")
-        assert result.exit_code == 0
-        gql, _ = fake_client
-        gql.mutate.assert_not_called()
-
-    def test_user_errors_returned(self, app, fake_client):
-        gql, _ = fake_client
-        gql.mutate.return_value = {
-            "clientArchive": {
-                "client": None,
-                "userErrors": [{"path": "id", "message": "bad"}],
-            }
-        }
-        result = runner.invoke(app, ["delete", "1", "--force"])
-        assert result.exit_code == 1
+    @pytest.mark.parametrize("fn_name", ['create_client', 'update_client', 'delete_client'])
+    def test_gated(self, fn_name):
+        fn = getattr(client_commands, fn_name)
+        with pytest.raises(typer.Exit) as exc:
+            fn()
+        assert exc.value.exit_code == 2

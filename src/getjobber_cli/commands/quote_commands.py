@@ -11,6 +11,7 @@ from getjobber_cli.api.queries import GET_QUOTE, LIST_QUOTES
 from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
+from getjobber_cli.utils.gating import write_command_pending
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -54,8 +55,8 @@ def list_quotes(
                     "ID": q.get("id", ""),
                     "Number": q.get("quoteNumber", ""),
                     "Title": q.get("title", ""),
-                    "Status": q.get("status", ""),
-                    "Amount": q.get("totalAmount", ""),
+                    "Status": q.get("quoteStatus", ""),
+                    "Amount": (q.get("amounts") or {}).get("total", ""),
                 }
                 for q in quotes
             ]
@@ -103,6 +104,7 @@ def get_quote(quote_id: Annotated[str, typer.Argument(help="Quote ID")]):
         raise typer.Exit(1)
 
 
+@write_command_pending
 def create_quote(
     client_id: Annotated[str, typer.Option(help="Client ID (required)")],
     title: Annotated[Optional[str], typer.Option(help="Quote title")] = None,
@@ -142,6 +144,7 @@ def create_quote(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def send_quote(
     quote_id: Annotated[str, typer.Argument(help="Quote ID")],
     force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False,
@@ -179,6 +182,7 @@ def send_quote(
         raise typer.Exit(1)
 
 
+@write_command_pending
 def approve_quote(
     quote_id: Annotated[str, typer.Argument(help="Quote ID")],
 ):
