@@ -66,6 +66,22 @@ class TestExecuteQuery:
         with pytest.raises(RateLimitError):
             execute_query(client, "query { __typename }")
 
+    def test_throttled_graphql_error_raises_rate_limit(self):
+        client = MagicMock()
+        exc = Exception("query had problems")
+        exc.errors = [
+            {
+                "message": "Throttled",
+                "extensions": {
+                    "code": "THROTTLED",
+                    "documentation": "https://developer.getjobber.com/docs/using_jobbers_api/api_rate_limits",
+                },
+            }
+        ]
+        client.execute.side_effect = exc
+        with pytest.raises(RateLimitError):
+            execute_query(client, "query { __typename }")
+
     def test_structured_errors_raise_graphql_error(self):
         client = MagicMock()
         exc = Exception("query had problems")

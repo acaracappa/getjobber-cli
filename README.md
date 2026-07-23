@@ -52,6 +52,8 @@ This tool is provided as-is with no warranties. You use it at your own risk. We 
 - Python 3.10 or higher
 - GetJobber account with OAuth app credentials
 
+Targets Jobber GraphQL API version `2025-04-16` (the latest active version as of 2026-07-23), sent via the `X-JOBBER-GRAPHQL-VERSION` header.
+
 ## Installation
 
 ### From Source
