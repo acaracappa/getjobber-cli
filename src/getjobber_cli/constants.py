@@ -52,5 +52,5 @@ VALID_OUTPUT_FORMATS = [
 
 # CLI Metadata
 APP_NAME = "getjobber-cli"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.1.1"
 APP_DESCRIPTION = "CLI tool for accessing the GetJobber CRM GraphQL API"
