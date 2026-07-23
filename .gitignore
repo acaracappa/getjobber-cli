@@ -30,6 +30,9 @@ PACKAGE
 *.manifest
 *.spec
 
+# Vendored third-party docs (local reference only; not for redistribution)
+docs/vendor/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
