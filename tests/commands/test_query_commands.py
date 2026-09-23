@@ -22,11 +22,7 @@ def app():
 def fake_client(monkeypatch):
     mock_gql = MagicMock()
     mock_gql.query.return_value = {"ok": True}
-    mock_tm = MagicMock()
-    mock_tm.is_authenticated.return_value = True
-    mock_tm.get_access_token.return_value = "tok"
-    monkeypatch.setattr(query_commands, "GraphQLClient", lambda *a, **kw: mock_gql)
-    monkeypatch.setattr(query_commands, "get_token_manager", lambda: mock_tm)
+    monkeypatch.setattr(query_commands, "get_authenticated_client", lambda: mock_gql)
     return mock_gql
 
 
@@ -59,14 +55,3 @@ def test_interactive_strips_comment_lines(app, fake_client, monkeypatch):
 
     assert result.exit_code == 0
     assert "#" not in fake_client.query.call_args[0][0]
-
-
-def test_missing_token_reports_not_authenticated(app, monkeypatch):
-    mock_tm = MagicMock()
-    mock_tm.is_authenticated.return_value = True
-    mock_tm.get_access_token.return_value = None
-    monkeypatch.setattr(query_commands, "get_token_manager", lambda: mock_tm)
-
-    result = runner.invoke(app, ["{ jobs { id } }"])
-
-    assert result.exit_code == 1

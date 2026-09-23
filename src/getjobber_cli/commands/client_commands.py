@@ -5,10 +5,9 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from getjobber_cli.api.client import GraphQLClient
+from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.api.mutations import CREATE_CLIENT, DELETE_CLIENT, UPDATE_CLIENT
 from getjobber_cli.api.queries import GET_CLIENT, LIST_CLIENTS, SEARCH_CLIENTS
-from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.config import get_config
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
@@ -24,25 +23,6 @@ from getjobber_cli.utils.formatters import (
 )
 
 
-def _get_authenticated_client() -> GraphQLClient:
-    """Get authenticated GraphQL client.
-
-    Returns:
-        GraphQLClient instance.
-
-    Raises:
-        NotAuthenticatedError: If not authenticated.
-    """
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
-    if access_token is None:
-        raise NotAuthenticatedError()
-    return GraphQLClient(access_token)
-
-
 def list_clients(
     limit: Annotated[
         int, typer.Option(help="Number of clients to retrieve")
@@ -53,7 +33,7 @@ def list_clients(
 ):
     """List all clients."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         # Execute query
         result = client.query(LIST_CLIENTS, variables={"first": limit})
@@ -96,7 +76,7 @@ def get_client(
 ):
     """Get detailed client information."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         # Execute query
         result = client.query(GET_CLIENT, variables={"id": client_id})
@@ -162,7 +142,7 @@ def create_client(
             client_input["phoneNumber"] = phone
 
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(CREATE_CLIENT, variables={"input": client_input})
 
         # Check for errors
@@ -223,7 +203,7 @@ def update_client(
             raise typer.Exit(1)
 
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(
             UPDATE_CLIENT, variables={"id": client_id, "input": client_input}
         )
@@ -272,7 +252,7 @@ def delete_client(
                 raise typer.Exit(0)
 
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(DELETE_CLIENT, variables={"id": client_id})
 
         # Check for errors
@@ -307,7 +287,7 @@ def search_clients(
 ):
     """Search for clients."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         # Execute query
         result = client.query(SEARCH_CLIENTS, variables={"query": query, "first": limit})
