@@ -87,9 +87,9 @@ classic branch protection rules) and apply to `main`:
   - Dismiss stale approvals when new commits are pushed: enabled
 - **Require status checks to pass before merging**
   - Require branches to be up to date before merging: enabled
-  - Required status checks: add the `test.yml` workflow job(s) once Group B's
-    CI is merged and has run at least once (the check name only appears in the
-    selector after its first run)
+  - Required status checks: `test (3.10)`, `test (3.11)`, `test (3.12)`, and
+    `lint`, all from the `Tests` workflow. `lint` runs `black --check` and
+    `mypy src/`.
 - **Require conversation resolution before merging**: enabled
 - **Block force pushes**: enabled
 - **Restrict deletions**: enabled
@@ -99,6 +99,10 @@ classic branch protection rules) and apply to `main`:
 - **Dependency graph**: Enabled (default on public repos)
 - **Dependabot alerts**: Enabled
 - **Dependabot security updates**: Enabled
+- **Dependabot version updates**: configured in `.github/dependabot.yml`
+  (monthly, grouped) for both `uv` and `github-actions`. Grouping matters here:
+  every Python update touches `uv.lock`, so ungrouped PRs conflict with each
+  other and each merge forces the rest to rebase.
 - **Secret scanning**: Enabled (default on public repos)
 - **Secret scanning push protection**: Enabled
 
