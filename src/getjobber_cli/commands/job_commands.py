@@ -36,7 +36,9 @@ def _get_authenticated_client() -> GraphQLClient:
 def list_jobs(
     limit: Annotated[int, typer.Option(help="Number of jobs to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
     status: Annotated[Optional[str], typer.Option(help="Filter by status")] = None,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """List all jobs."""
     try:

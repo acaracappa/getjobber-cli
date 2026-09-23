@@ -79,7 +79,10 @@ def execute_query(client: Client, query: str, variables: Optional[Dict[str, Any]
             # Query-cost throttling returns a GraphQL error with code THROTTLED
             # (not an HTTP 429); see docs/using_jobbers_api/api_rate_limits
             for error in e.errors:
-                if isinstance(error, dict) and error.get("extensions", {}).get("code") == "THROTTLED":
+                if (
+                    isinstance(error, dict)
+                    and error.get("extensions", {}).get("code") == "THROTTLED"
+                ):
                     from getjobber_cli.utils.errors import RateLimitError
 
                     raise RateLimitError()

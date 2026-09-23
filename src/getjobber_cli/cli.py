@@ -25,7 +25,9 @@ def version_callback(value: bool):
 def main(
     version: Annotated[
         bool,
-        typer.Option("--version", "-v", callback=version_callback, is_eager=True, help="Show version"),
+        typer.Option(
+            "--version", "-v", callback=version_callback, is_eager=True, help="Show version"
+        ),
     ] = False,
 ):
     """GetJobber CLI - Terminal access to GetJobber CRM API."""

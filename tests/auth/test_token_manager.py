@@ -25,16 +25,20 @@ def token_manager_with_keyring(tmp_path):
         mock_keyring.get_password.return_value = None
         tm = TokenManager(config_dir=tmp_path / ".getjobber")
         tm._keyring_store = {}
+
         # Wire the mock to a fake store after the availability check
         def fake_set(service, user, value):
             tm._keyring_store[(service, user)] = value
+
         def fake_get(service, user):
             return tm._keyring_store.get((service, user))
+
         def fake_delete(service, user):
             if (service, user) in tm._keyring_store:
                 del tm._keyring_store[(service, user)]
             else:
                 raise keyring.errors.PasswordDeleteError("missing")
+
         mock_keyring.set_password.side_effect = fake_set
         mock_keyring.get_password.side_effect = fake_get
         mock_keyring.delete_password.side_effect = fake_delete

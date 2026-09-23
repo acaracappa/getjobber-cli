@@ -23,7 +23,9 @@ from getjobber_cli.utils.errors import OAuthError
 class OAuthFlow:
     """Manages OAuth 2.0 authorization flow."""
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str = DEFAULT_REDIRECT_URI):
+    def __init__(
+        self, client_id: str, client_secret: str, redirect_uri: str = DEFAULT_REDIRECT_URI
+    ):
         """Initialize OAuth flow.
 
         Args:
