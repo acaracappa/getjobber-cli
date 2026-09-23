@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file holds plain JSON and is protected only by `0600` permissions. No code
   behaviour changed here; the documentation was wrong, and a reader could have
   accepted the fallback believing their tokens were encrypted at rest.
+- **Documented the real state of the pinned Jobber API version.** The README
+  claimed `2025-04-16` was "the latest active version as of 2026-07-23". It was
+  not the latest even then: Jobber had already published `2026-05-12` and four
+  other newer versions. The pin is still active, but its 18-month accessibility
+  window closes around 2026-10-16.
 - All runtime and development dependencies upgraded; `cryptography` and
   `anyio` moved to versions that close four Dependabot security advisories.
   Both are transitive and unexercised by this CLI, so no behaviour changes.
