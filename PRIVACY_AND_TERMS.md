@@ -11,7 +11,7 @@
 - **No Telemetry**: This tool does not send any usage statistics, error reports, or telemetry data to any external servers.
 - **No Analytics**: We do not track how you use this tool, what commands you run, or what data you access.
 - **No Personal Information**: We do not collect names, email addresses, or any other personal information.
-- **Local Storage Only**: All configuration data (OAuth credentials, tokens) is stored locally on your device using OS-level secure storage (Keychain/Credential Manager) or encrypted local files.
+- **Local Storage Only**: All configuration data (OAuth credentials, tokens) is stored locally on your device, never on our servers. Tokens use OS-level secure storage (Keychain/Credential Manager/Secret Service) where it is available. Where it is not, they fall back to a local file that is **not encrypted** and is protected only by filesystem permissions (mode `0600`). OAuth client credentials in `~/.getjobber/config.json` are likewise stored in plain text, also at mode `0600` inside a `0700` directory.
 
 ### Third-Party Services
 

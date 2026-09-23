@@ -90,7 +90,7 @@ class TokenManager:
                 # Store in OS keychain
                 keyring.set_password(KEYRING_SERVICE_NAME, KEYRING_USERNAME, token_json)
             else:
-                # Fallback to encrypted file
+                # Fallback to a permissions-protected file (not encrypted)
                 self._ensure_config_dir()
                 with open(self.credentials_file, "w") as f:
                     f.write(token_json)
