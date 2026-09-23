@@ -11,6 +11,7 @@ from getjobber_cli.api.client import (
     execute_query,
     get_authenticated_client,
 )
+from getjobber_cli.constants import API_VERSION
 from getjobber_cli.utils.errors import (
     GraphQLError,
     NotAuthenticatedError,
@@ -32,7 +33,8 @@ class TestCreateClient:
         # The transport should carry the Authorization header
         headers = c.transport.headers
         assert headers["Authorization"] == "Bearer my_token"
-        assert headers["X-JOBBER-GRAPHQL-VERSION"] == "2025-04-16"
+        assert headers["X-JOBBER-GRAPHQL-VERSION"] == "2026-05-12"
+        assert headers["X-JOBBER-GRAPHQL-VERSION"] == API_VERSION
         assert headers["Content-Type"] == "application/json"
 
 
