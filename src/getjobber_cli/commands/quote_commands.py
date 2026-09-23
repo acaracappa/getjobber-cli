@@ -1,6 +1,6 @@
 """Quote management commands for GetJobber CLI."""
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -30,19 +30,25 @@ def _get_authenticated_client() -> GraphQLClient:
         raise NotAuthenticatedError()
 
     access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
     return GraphQLClient(access_token)
 
 
 def list_quotes(
-    limit: Annotated[int, typer.Option(help="Number of quotes to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
+    limit: Annotated[
+        int, typer.Option(help="Number of quotes to retrieve")
+    ] = DEFAULT_ITEMS_PER_PAGE,
     status: Annotated[Optional[str], typer.Option(help="Filter by status")] = None,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """List all quotes."""
     try:
         client = _get_authenticated_client()
 
-        variables = {"first": limit}
+        variables: Dict[str, Any] = {"first": limit}
         if status:
             variables["status"] = status
 

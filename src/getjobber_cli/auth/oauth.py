@@ -23,7 +23,9 @@ from getjobber_cli.utils.errors import OAuthError
 class OAuthFlow:
     """Manages OAuth 2.0 authorization flow."""
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str = DEFAULT_REDIRECT_URI):
+    def __init__(
+        self, client_id: str, client_secret: str, redirect_uri: str = DEFAULT_REDIRECT_URI
+    ):
         """Initialize OAuth flow.
 
         Args:
@@ -113,7 +115,7 @@ class OAuthFlow:
                 error_message = error_data.get("error_description", "Token exchange failed")
                 raise OAuthError(error_message, error_code=error_data.get("error"))
 
-            token_response = response.json()
+            token_response: dict = response.json()
             return token_response
 
         except requests.exceptions.RequestException as e:
@@ -151,7 +153,7 @@ class OAuthFlow:
                 error_message = error_data.get("error_description", "Token refresh failed")
                 raise OAuthError(error_message, error_code=error_data.get("error"))
 
-            token_response = response.json()
+            token_response: dict = response.json()
             return token_response
 
         except requests.exceptions.RequestException as e:

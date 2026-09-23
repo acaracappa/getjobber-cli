@@ -633,6 +633,8 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "responses" },
+    { name = "types-pyyaml" },
+    { name = "types-requests-oauthlib" },
 ]
 
 [package.metadata]
@@ -650,6 +652,8 @@ requires-dist = [
     { name = "responses", marker = "extra == 'dev'", specifier = ">=0.26" },
     { name = "rich", specifier = ">=15.0" },
     { name = "typer", specifier = ">=0.26" },
+    { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "types-requests-oauthlib", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "typing-extensions", specifier = ">=4.15" },
 ]
 provides-extras = ["dev"]
@@ -1702,6 +1706,37 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/16/f7/57713ba479fd405eb76de31404b2c744c289e336b2d999511ebf51e496f7/typer-0.27.2.tar.gz", hash = "sha256:269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945", size = 204045, upload-time = "2026-08-28T10:26:55.046Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/bf/205d0004930ede8f542fb58f601526fccf4ae7626075ca1e6c4de5d3d652/typer-0.27.2-py3-none-any.whl", hash = "sha256:b3a5fc4342d5fc8fda8fc3010b1cf117e9249aab7fae800c2eff62fd3842d97d", size = 123130, upload-time = "2026-08-28T10:26:53.752Z" },
+]
+
+[[package]]
+name = "types-oauthlib"
+version = "3.3.0.20260724"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9e/ed/72823bc9c60e8f5354827eec6b85aa1baec94b3ca6c62f8e104c3717c31b/types_oauthlib-3.3.0.20260724.tar.gz", hash = "sha256:00c7dab6a2f764e991180bff4bdb1ba8bddb1d546013b1c81f903192c30f2386", size = 26194, upload-time = "2026-07-24T04:58:57.564Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/e8/96d1e19015c1384022a296a2e73d7843739ccc2f13afcaed5c2f797c86e4/types_oauthlib-3.3.0.20260724-py3-none-any.whl", hash = "sha256:73bc776c00ed00957bc1422a3a53696d8aa18f24c47a628e08566c0d4e0a6bbd", size = 48967, upload-time = "2026-07-24T04:58:56.634Z" },
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20260906"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/90/6e/abec85b9013db5b934b0280a6dd104904d84f7bcbaab2e2f3def87ac7463/types_pyyaml-6.0.12.20260906.tar.gz", hash = "sha256:f59c1cc05010b833d2d72287bbaa72610106b28d42d89a907313117faba85212", size = 18649, upload-time = "2026-09-06T06:35:35.362Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/15/c0/fc0644b7ddcfb969e95845837143cb5173ddd6e06ee4ba5fc493cd9329b7/types_pyyaml-6.0.12.20260906-py3-none-any.whl", hash = "sha256:bca893ff0d51df5c9053137d5d0e6ccd36e939a196356f1d5c16372422f5137b", size = 21282, upload-time = "2026-09-06T06:35:34.372Z" },
+]
+
+[[package]]
+name = "types-requests-oauthlib"
+version = "2.0.0.20260907"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "types-oauthlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e5/09/e4f8e39b89626cec4ed7915cf28992269756f0eb56a98a187a05f3b2ac00/types_requests_oauthlib-2.0.0.20260907.tar.gz", hash = "sha256:fc2c725ad136c9bba3b8416fb3f737f3aef98c4c77196e81aeed085b6d8e9aa3", size = 11763, upload-time = "2026-09-07T06:43:41.201Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/31/5247e2ecf66c6990b5c49a48707322f36c3ccce25e8a4725b066dea53be7/types_requests_oauthlib-2.0.0.20260907-py3-none-any.whl", hash = "sha256:985c9a50dc95dda0667c2afa8b90a5a41d12a8e6221ae28a5372cf838f76fcfc", size = 14412, upload-time = "2026-09-07T06:43:40.305Z" },
 ]
 
 [[package]]

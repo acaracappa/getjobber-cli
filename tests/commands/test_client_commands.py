@@ -94,9 +94,7 @@ class TestListClients:
 class TestGetClient:
     def test_happy_path(self, app, fake_client):
         gql, _ = fake_client
-        gql.query.return_value = {
-            "client": {"id": "1", "firstName": "John", "lastName": "Doe"}
-        }
+        gql.query.return_value = {"client": {"id": "1", "firstName": "John", "lastName": "Doe"}}
         result = runner.invoke(app, ["get", "1"])
         assert result.exit_code == 0
 
@@ -136,7 +134,7 @@ class TestSearchClients:
 class TestWriteCommandsGated:
     """Write commands are gated pending the v1.2.0 write redesign."""
 
-    @pytest.mark.parametrize("fn_name", ['create_client', 'update_client', 'delete_client'])
+    @pytest.mark.parametrize("fn_name", ["create_client", "update_client", "delete_client"])
     def test_gated(self, fn_name):
         fn = getattr(client_commands, fn_name)
         with pytest.raises(typer.Exit) as exc:

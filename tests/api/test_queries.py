@@ -5,11 +5,8 @@ from gql import gql
 
 from getjobber_cli.api import queries
 
-
 QUERY_CONSTANTS = [
-    name
-    for name in dir(queries)
-    if name.isupper() and isinstance(getattr(queries, name), str)
+    name for name in dir(queries) if name.isupper() and isinstance(getattr(queries, name), str)
 ]
 
 

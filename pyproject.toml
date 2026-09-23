@@ -48,6 +48,8 @@ dev = [
     "black>=26.0",
     "mypy>=2.0",
     "responses>=0.26",
+    "types-PyYAML>=6.0",
+    "types-requests-oauthlib>=2.0",
 ]
 
 [project.scripts]

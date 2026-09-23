@@ -102,9 +102,7 @@ class TestExecuteMutation:
     def test_delegates_to_execute_query(self):
         client = MagicMock()
         client.execute.return_value = {"clientCreate": {"client": {"id": "1"}}}
-        result = execute_mutation(
-            client, "mutation { clientCreate(input: {}) { client { id } } }"
-        )
+        result = execute_mutation(client, "mutation { clientCreate(input: {}) { client { id } } }")
         assert result == {"clientCreate": {"client": {"id": "1"}}}
 
 

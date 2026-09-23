@@ -3,7 +3,7 @@
 import json
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import keyring
 
@@ -121,7 +121,7 @@ class TokenManager:
                 with open(self.credentials_file, "r") as f:
                     token_json = f.read()
 
-            token_data = json.loads(token_json)
+            token_data: Dict[Any, Any] = json.loads(token_json)
             return token_data
 
         except json.JSONDecodeError:
@@ -159,7 +159,7 @@ class TokenManager:
         Returns:
             True if token is expired or will expire soon.
         """
-        expires_at = token_data.get("expires_at", 0)
+        expires_at = int(token_data.get("expires_at", 0))
         current_time = int(time.time())
 
         # Consider token expired if it expires within buffer time

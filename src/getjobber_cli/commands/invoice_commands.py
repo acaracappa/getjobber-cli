@@ -1,6 +1,6 @@
 """Invoice management commands for GetJobber CLI."""
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -30,20 +30,26 @@ def _get_authenticated_client() -> GraphQLClient:
         raise NotAuthenticatedError()
 
     access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
     return GraphQLClient(access_token)
 
 
 def list_invoices(
-    limit: Annotated[int, typer.Option(help="Number of invoices to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
+    limit: Annotated[
+        int, typer.Option(help="Number of invoices to retrieve")
+    ] = DEFAULT_ITEMS_PER_PAGE,
     status: Annotated[Optional[str], typer.Option(help="Filter by status")] = None,
     unpaid: Annotated[bool, typer.Option(help="Show only unpaid invoices")] = False,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """List all invoices."""
     try:
         client = _get_authenticated_client()
 
-        variables = {"first": limit}
+        variables: Dict[str, Any] = {"first": limit}
         # `status` maps to InvoiceStatusTypeEnum (draft, awaiting_payment, paid,
         # past_due, bad_debt, sent_not_due). There is no single "unpaid" status,
         # so --unpaid is applied client-side by outstanding balance.
@@ -54,7 +60,9 @@ def list_invoices(
         invoices = extract_list_data(result, "invoices")
 
         if unpaid:
-            invoices = [i for i in invoices if ((i.get("amounts") or {}).get("invoiceBalance") or 0) > 0]
+            invoices = [
+                i for i in invoices if ((i.get("amounts") or {}).get("invoiceBalance") or 0) > 0
+            ]
 
         if format == OUTPUT_FORMAT_TABLE:
             simplified = [
