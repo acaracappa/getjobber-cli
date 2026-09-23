@@ -32,13 +32,30 @@ A portable, Python-based CLI tool that provides terminal access to the GetJobber
 
 This tool is provided as-is with no warranties. You use it at your own risk. We collect no data and assume no liability for any impact to your GetJobber account.
 
+### Write commands are temporarily disabled
+
+As of v1.1.0 this CLI is **read-only**. Jobber's current GraphQL schema reworked
+the write surface: several mutations the write commands used (`invoiceSend`,
+`quoteSend`, `quoteApprove`, `jobComplete`) no longer exist, and the create
+mutations now require nested inputs the commands don't yet collect. Rather than
+fail with cryptic GraphQL errors, the eleven write commands below exit
+immediately with an explanatory message:
+
+`clients create` · `clients update` · `clients delete` · `jobs create` ·
+`jobs update` · `jobs complete` · `quotes create` · `quotes send` ·
+`quotes approve` · `invoices create` · `invoices send`
+
+Everything else — `list`, `get`, `search`, `query`, and all authentication and
+configuration commands — is fully supported against the current schema. The
+write redesign is planned for v1.2.0.
+
 ## Features
 
 - **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
-- **Client Management** - Create, read, update, delete, and search clients
-- **Job Management** - Manage jobs with full CRUD operations
-- **Quote Management** - Create, send, and approve quotes
-- **Invoice Management** - Create and send invoices, track payments
+- **Client Management** - List, retrieve, and search clients (write commands pending v1.2.0)
+- **Job Management** - List and retrieve jobs (write commands pending v1.2.0)
+- **Quote Management** - List and retrieve quotes (write commands pending v1.2.0)
+- **Invoice Management** - List and retrieve invoices (write commands pending v1.2.0)
 - **Raw GraphQL Queries** - Execute custom GraphQL queries directly
 - **Multiple Output Formats** - Table, JSON, CSV, and YAML output formats
 - **Secure Token Storage** - OS-level keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
@@ -117,8 +134,8 @@ getjobber-cli clients list
 # Get client details
 getjobber-cli clients get CLIENT_ID
 
-# Create a new client
-getjobber-cli clients create --first-name="John" --last-name="Doe" --email="john@example.com"
+# Search clients
+getjobber-cli clients search "company name"
 
 # List jobs
 getjobber-cli jobs list
@@ -155,23 +172,23 @@ getjobber-cli clients list --limit=50 --format=json
 # Get client details
 getjobber-cli clients get CLIENT_ID
 
-# Create client (interactive)
+# Create client (interactive) - pending v1.2.0
 getjobber-cli clients create
 
-# Create client (with flags)
+# Create client (with flags) - pending v1.2.0
 getjobber-cli clients create \
   --first-name="John" \
   --last-name="Doe" \
   --email="john@example.com" \
   --phone="555-1234"
 
-# Update client
+# Update client - pending v1.2.0
 getjobber-cli clients update CLIENT_ID --email="newemail@example.com"
 
 # Search clients
 getjobber-cli clients search "company name"
 
-# Delete client
+# Delete client - pending v1.2.0
 getjobber-cli clients delete CLIENT_ID
 ```
 
@@ -185,13 +202,13 @@ getjobber-cli jobs list --status=active
 # Get job details
 getjobber-cli jobs get JOB_ID
 
-# Create job
+# Create job - pending v1.2.0
 getjobber-cli jobs create --client-id=CLIENT_ID --title="Lawn Maintenance"
 
-# Update job
+# Update job - pending v1.2.0
 getjobber-cli jobs update JOB_ID --title="Updated Title"
 
-# Complete job
+# Complete job - pending v1.2.0
 getjobber-cli jobs complete JOB_ID
 ```
 
@@ -205,13 +222,13 @@ getjobber-cli quotes list --status=draft
 # Get quote details
 getjobber-cli quotes get QUOTE_ID
 
-# Create quote
+# Create quote - pending v1.2.0
 getjobber-cli quotes create --client-id=CLIENT_ID --title="Service Quote"
 
-# Send quote to client
+# Send quote to client - pending v1.2.0
 getjobber-cli quotes send QUOTE_ID
 
-# Approve quote
+# Approve quote - pending v1.2.0
 getjobber-cli quotes approve QUOTE_ID
 ```
 
@@ -225,13 +242,13 @@ getjobber-cli invoices list --unpaid
 # Get invoice details
 getjobber-cli invoices get INVOICE_ID
 
-# Create invoice from job
+# Create invoice from job - pending v1.2.0
 getjobber-cli invoices create --job-id=JOB_ID --subject="Service Invoice"
 
-# Create invoice for client
+# Create invoice for client - pending v1.2.0
 getjobber-cli invoices create --client-id=CLIENT_ID --subject="Invoice"
 
-# Send invoice to client
+# Send invoice to client - pending v1.2.0
 getjobber-cli invoices send INVOICE_ID
 ```
 
@@ -357,6 +374,19 @@ black src/ tests/
 
 # Type checking with mypy
 mypy src/
+```
+
+Both run as blocking CI checks, alongside the test suite on Python 3.10, 3.11,
+and 3.12.
+
+### Reproducible installs
+
+A `uv.lock` file is committed. With [uv](https://docs.astral.sh/uv/) installed,
+`uv sync --extra dev` reproduces the exact pinned dependency set:
+
+```bash
+uv sync --extra dev
+uv run pytest
 ```
 
 ## Maintainer

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **`query --interactive` no longer crashes.** The command called
+  `typer.edit()`, which Typer has never exported and which raises
+  `AttributeError` on Typer 0.27. It now uses `click.edit()`, the function
+  it was always meant to wrap. The interactive path had no test coverage,
+  which is why the break went unnoticed.
+- **A missing access token now reports "not authenticated."** Commands passed
+  the result of `get_access_token()` straight to `GraphQLClient` without
+  checking for `None`, so a token cleared between the authentication check
+  and the read surfaced as an unrelated downstream error instead of a prompt
+  to log in.
+
+### Changed
+- All runtime and development dependencies upgraded; `cryptography` and
+  `anyio` moved to versions that close four Dependabot security advisories.
+  Both are transitive and unexercised by this CLI, so no behaviour changes.
+- Dependency floors in `pyproject.toml` raised to the versions actually
+  supported and tested. The previous floors spanned several major releases
+  and were never exercised.
+- `typer[all]` is now plain `typer`; Typer no longer defines an `all` extra.
+- The authenticated-client helper, previously copy-pasted into all five
+  command modules, now lives once in `getjobber_cli.api.client` as
+  `get_authenticated_client()`.
+
+### Added
+- `black --check` and `mypy` run as blocking CI checks alongside the test
+  matrix, so formatting and typing cannot drift again.
+- Dependabot configuration for monthly grouped dependency and GitHub Actions
+  updates.
+
 ## [1.1.1] — 2026-07-23
 
 ### Fixed

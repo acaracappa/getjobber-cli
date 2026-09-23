@@ -9,6 +9,7 @@ from getjobber_cli.api.client import (
     create_client,
     execute_mutation,
     execute_query,
+    get_authenticated_client,
 )
 from getjobber_cli.utils.errors import (
     GraphQLError,
@@ -131,3 +132,28 @@ class TestGraphQLClientWrapper:
             mock_create.return_value = MagicMock()
             GraphQLClient("at")
             mock_create.assert_called_once_with("at")
+
+
+class TestGetAuthenticatedClient:
+    @pytest.fixture
+    def token_manager(self, monkeypatch):
+        mock_tm = MagicMock()
+        mock_tm.is_authenticated.return_value = True
+        mock_tm.get_access_token.return_value = "tok"
+        monkeypatch.setattr("getjobber_cli.api.client.get_token_manager", lambda: mock_tm)
+        return mock_tm
+
+    def test_returns_client_for_stored_token(self, token_manager):
+        assert isinstance(get_authenticated_client(), GraphQLClient)
+
+    def test_unauthenticated_raises(self, token_manager):
+        token_manager.is_authenticated.return_value = False
+        with pytest.raises(NotAuthenticatedError):
+            get_authenticated_client()
+
+    def test_missing_token_raises(self, token_manager):
+        # is_authenticated() can pass while the token itself is gone, e.g. the
+        # keyring entry was cleared between the check and the read.
+        token_manager.get_access_token.return_value = None
+        with pytest.raises(NotAuthenticatedError):
+            get_authenticated_client()

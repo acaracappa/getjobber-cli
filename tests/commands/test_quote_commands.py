@@ -7,6 +7,7 @@ import typer
 from typer.testing import CliRunner
 
 from getjobber_cli.commands import quote_commands
+from getjobber_cli.utils.errors import NotAuthenticatedError
 
 runner = CliRunner()
 
@@ -31,25 +32,21 @@ def fake_client(monkeypatch):
     mock_gql = MagicMock()
     mock_gql.query.return_value = {}
     mock_gql.mutate.return_value = {}
-    mock_tm = MagicMock()
-    mock_tm.is_authenticated.return_value = True
-    mock_tm.get_access_token.return_value = "tok"
-    monkeypatch.setattr(quote_commands, "GraphQLClient", lambda *a, **kw: mock_gql)
-    monkeypatch.setattr(quote_commands, "get_token_manager", lambda: mock_tm)
-    return mock_gql, mock_tm
+    monkeypatch.setattr(quote_commands, "get_authenticated_client", lambda: mock_gql)
+    return mock_gql
 
 
 @pytest.fixture
 def unauthenticated(monkeypatch):
-    mock_tm = MagicMock()
-    mock_tm.is_authenticated.return_value = False
-    monkeypatch.setattr(quote_commands, "get_token_manager", lambda: mock_tm)
-    return mock_tm
+    def _unauthenticated():
+        raise NotAuthenticatedError()
+
+    monkeypatch.setattr(quote_commands, "get_authenticated_client", _unauthenticated)
 
 
 class TestListQuotes:
     def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
+        gql = fake_client
         gql.query.return_value = {
             "quotes": {
                 "nodes": [
@@ -67,7 +64,7 @@ class TestListQuotes:
         assert result.exit_code == 0
 
     def test_with_status_filter(self, app, fake_client):
-        gql, _ = fake_client
+        gql = fake_client
         gql.query.return_value = {"quotes": {"nodes": []}}
         result = runner.invoke(app, ["list", "--status", "draft"])
         assert result.exit_code == 0
@@ -75,7 +72,7 @@ class TestListQuotes:
         assert kwargs["variables"]["status"] == "draft"
 
     def test_json_format(self, app, fake_client):
-        gql, _ = fake_client
+        gql = fake_client
         gql.query.return_value = {"quotes": {"nodes": []}}
         result = runner.invoke(app, ["list", "--format", "json"])
         assert result.exit_code == 0
@@ -87,13 +84,13 @@ class TestListQuotes:
 
 class TestGetQuote:
     def test_happy_path(self, app, fake_client):
-        gql, _ = fake_client
+        gql = fake_client
         gql.query.return_value = {"quote": {"id": "1", "title": "T"}}
         result = runner.invoke(app, ["get", "1"])
         assert result.exit_code == 0
 
     def test_not_found(self, app, fake_client):
-        gql, _ = fake_client
+        gql = fake_client
         gql.query.return_value = {"quote": {}}
         result = runner.invoke(app, ["get", "missing"])
         assert result.exit_code == 1

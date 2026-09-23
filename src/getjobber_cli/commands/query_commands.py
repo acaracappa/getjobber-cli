@@ -7,22 +7,9 @@ import click
 import typer
 from typing_extensions import Annotated
 
-from getjobber_cli.api.client import GraphQLClient
-from getjobber_cli.auth.token_manager import get_token_manager
+from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
 from getjobber_cli.utils.formatters import format_output, print_error
-
-
-def _get_authenticated_client() -> GraphQLClient:
-    """Get authenticated GraphQL client."""
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
-    if access_token is None:
-        raise NotAuthenticatedError()
-    return GraphQLClient(access_token)
 
 
 def execute_query(
@@ -57,7 +44,7 @@ def execute_query(
             raise typer.Exit(1)
 
         # Execute query
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
         result = client.query(query)
 
         # Output result as JSON

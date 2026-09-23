@@ -19,8 +19,13 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-This installs the CLI along with `pytest`, `pytest-cov`, `black`, `mypy`, and
-`responses` for testing and linting.
+This installs the CLI along with `pytest`, `pytest-cov`, `black`, `mypy`,
+`responses`, and the `types-PyYAML` and `types-requests-oauthlib` stub packages
+for testing and linting.
+
+A `uv.lock` file is committed for reproducible development installs. If you use
+[uv](https://docs.astral.sh/uv/), `uv sync --extra dev` installs the exact
+pinned set instead.
 
 ## Running tests
 
@@ -56,13 +61,16 @@ black src/ tests/
 mypy src/
 ```
 
-Please run `black` and `mypy` before submitting a pull request.
+Please run `black` and `mypy` before submitting a pull request. Both run as
+blocking checks in CI, so a pull request that fails either will not be
+mergeable.
 
 ## Submitting pull requests
 
 1. Fork the repository and create a feature branch off `main`.
 2. Make your changes, including tests where applicable.
-3. Ensure `pytest`, `black`, and `mypy` all pass locally.
+3. Ensure `pytest`, `black`, and `mypy` all pass locally. CI runs the same
+   three against Python 3.10, 3.11, and 3.12.
 4. Open a pull request against `main` with a clear description of the change.
 5. Reference any related GitHub issue (e.g., `Fixes #123`).
 

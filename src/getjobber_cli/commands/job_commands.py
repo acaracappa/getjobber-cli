@@ -5,10 +5,9 @@ from typing import Any, Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from getjobber_cli.api.client import GraphQLClient
+from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.api.mutations import COMPLETE_JOB, CREATE_JOB, UPDATE_JOB
 from getjobber_cli.api.queries import GET_JOB, LIST_JOBS
-from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
 from getjobber_cli.utils.gating import write_command_pending
@@ -23,18 +22,6 @@ from getjobber_cli.utils.formatters import (
 )
 
 
-def _get_authenticated_client() -> GraphQLClient:
-    """Get authenticated GraphQL client."""
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
-    if access_token is None:
-        raise NotAuthenticatedError()
-    return GraphQLClient(access_token)
-
-
 def list_jobs(
     limit: Annotated[int, typer.Option(help="Number of jobs to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
     status: Annotated[Optional[str], typer.Option(help="Filter by status")] = None,
@@ -44,7 +31,7 @@ def list_jobs(
 ):
     """List all jobs."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         # Execute query
         variables: Dict[str, Any] = {"first": limit}
@@ -90,7 +77,7 @@ def get_job(
 ):
     """Get detailed job information."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         # Execute query
         result = client.query(GET_JOB, variables={"id": job_id})
@@ -138,7 +125,7 @@ def create_job(
             job_input["description"] = description
 
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(CREATE_JOB, variables={"input": job_input})
 
         # Check for errors
@@ -191,7 +178,7 @@ def update_job(
             raise typer.Exit(1)
 
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(UPDATE_JOB, variables={"id": job_id, "input": job_input})
 
         # Check for errors
@@ -228,7 +215,7 @@ def complete_job(
     """Mark a job as complete."""
     try:
         # Execute mutation
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(COMPLETE_JOB, variables={"id": job_id})
 
         # Check for errors

@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
+from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import API_BASE_URL, DEFAULT_TIMEOUT
 from getjobber_cli.utils.errors import GraphQLError, JobberAPIError, NotAuthenticatedError
 
@@ -157,3 +158,22 @@ class GraphQLClient:
             Mutation result dictionary.
         """
         return execute_mutation(self.client, mutation, variables)
+
+
+def get_authenticated_client() -> "GraphQLClient":
+    """Build a GraphQL client from the stored credentials.
+
+    Returns:
+        GraphQLClient instance.
+
+    Raises:
+        NotAuthenticatedError: If there is no usable access token.
+    """
+    token_manager = get_token_manager()
+    if not token_manager.is_authenticated():
+        raise NotAuthenticatedError()
+
+    access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
+    return GraphQLClient(access_token)
