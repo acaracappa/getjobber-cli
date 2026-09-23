@@ -51,7 +51,7 @@ write redesign is planned for v1.2.0.
 
 ## Features
 
-- **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
+- **OAuth 2.0 Authentication** - Secure browser-based authentication, with a stored refresh token you renew via `getjobber-cli auth refresh`
 - **Client Management** - List, retrieve, and search clients (write commands pending v1.2.0)
 - **Job Management** - List and retrieve jobs (write commands pending v1.2.0)
 - **Quote Management** - List and retrieve quotes (write commands pending v1.2.0)
@@ -356,7 +356,10 @@ If the browser doesn't open automatically, copy the URL from the terminal and pa
 
 ### Token expired
 
-Tokens are automatically refreshed when they expire. If you encounter issues, run:
+**Tokens are not refreshed automatically.** When the access token expires, every
+command reports `Not authenticated` until you renew it. The refresh token is
+stored at login, so renewing does not require signing in again:
+
 ```bash
 getjobber-cli auth refresh
 ```
