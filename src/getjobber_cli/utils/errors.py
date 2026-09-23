@@ -1,5 +1,7 @@
 """Custom exceptions for GetJobber CLI."""
 
+from typing import Any, Optional
+
 
 class JobberCLIError(Exception):
     """Base exception for all GetJobber CLI errors."""
@@ -18,7 +20,12 @@ class NotAuthenticatedError(JobberCLIError):
 class JobberAPIError(JobberCLIError):
     """Raised when the GetJobber API returns an error."""
 
-    def __init__(self, message: str, status_code: int = None, response_data: dict = None):
+    def __init__(
+        self,
+        message: str,
+        status_code: Optional[int] = None,
+        response_data: Optional[dict] = None,
+    ):
         self.message = message
         self.status_code = status_code
         self.response_data = response_data
@@ -36,7 +43,7 @@ class RateLimitError(JobberAPIError):
     def __init__(
         self,
         message: str = "API rate limit exceeded. Please try again later.",
-        retry_after: int = None,
+        retry_after: Optional[int] = None,
     ):
         self.retry_after = retry_after
         if retry_after:
@@ -55,7 +62,7 @@ class ConfigurationError(JobberCLIError):
 class OAuthError(JobberCLIError):
     """Raised when OAuth authentication flow fails."""
 
-    def __init__(self, message: str, error_code: str = None):
+    def __init__(self, message: str, error_code: Optional[str] = None):
         self.message = message
         self.error_code = error_code
         super().__init__(self.message)
@@ -87,7 +94,7 @@ class TokenExpiredError(NotAuthenticatedError):
 class ValidationError(JobberCLIError):
     """Raised when input validation fails."""
 
-    def __init__(self, message: str, field: str = None):
+    def __init__(self, message: str, field: Optional[str] = None):
         self.message = message
         self.field = field
         super().__init__(self.message)
@@ -101,7 +108,7 @@ class ValidationError(JobberCLIError):
 class GraphQLError(JobberAPIError):
     """Raised when GraphQL query/mutation returns errors."""
 
-    def __init__(self, message: str, errors: list = None):
+    def __init__(self, message: str, errors: Optional[list[Any]] = None):
         self.errors = errors or []
         super().__init__(message)
 

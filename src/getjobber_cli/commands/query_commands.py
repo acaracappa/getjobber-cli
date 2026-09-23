@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
+import click
 import typer
 from typing_extensions import Annotated
 
@@ -19,6 +20,8 @@ def _get_authenticated_client() -> GraphQLClient:
         raise NotAuthenticatedError()
 
     access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
     return GraphQLClient(access_token)
 
 
@@ -32,7 +35,7 @@ def execute_query(
         # Determine query source
         if interactive:
             # Open editor for interactive query input
-            query = typer.edit("\n# Enter your GraphQL query here\n")
+            query = click.edit("\n# Enter your GraphQL query here\n")
             if not query:
                 print_error("No query provided")
                 raise typer.Exit(1)
