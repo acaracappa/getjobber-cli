@@ -69,31 +69,16 @@ write redesign is planned for v1.2.0.
 - Python 3.10 or higher
 - GetJobber account with OAuth app credentials
 
-Targets Jobber GraphQL API version `2025-04-16`, sent via the
-`X-JOBBER-GRAPHQL-VERSION` header.
+Targets Jobber GraphQL API version `2026-05-12`, sent via the
+`X-JOBBER-GRAPHQL-VERSION` header and defined once as `API_VERSION` in
+`src/getjobber_cli/constants.py`.
 
-**This pin is old and needs attention.** Checked against
+`2026-05-12` was Jobber's latest active version when checked against
 [Jobber's changelog](https://developer.getjobber.com/docs/changelog/) on
-2026-09-23:
-
-- `2025-04-16` is still listed among Jobber's **active** versions, so the CLI
-  works today.
-- It is **not** the latest. Jobber has published six newer versions:
-  `2026-02-17`, `2026-03-10`, `2026-04-13`, `2026-04-16`, `2026-04-22`, and
-  `2026-05-12` (the current latest).
-- Jobber supports a version for a minimum of 12 months and keeps it accessible
-  for **up to 18 months from its release date**. For `2025-04-16` that outer
-  limit falls around **2026-10-16**, after which requests are automatically
-  upgraded to the oldest still-supported version — which may well behave
-  differently.
-
-Every documented change between `2025-04-16` and `2026-05-12` is a *dangerous*
-change rather than a breaking one: all six are new enum values
-(`InvoiceStatusTypeEnum.voided`, `RequestStatusTypeEnum.needs_approval`, and
-additions to `WorkObjectSendMessageType` and `EmailTypes`). Added enum values
-only break a client that exhaustively matches on them, which this CLI does not,
-so moving the pin forward should be low-risk — but it should be verified against
-a real account before release.
+2026-09-23. Jobber supports a version for a minimum of 12 months and keeps it
+accessible for up to 18 months from its release date, after which requests are
+silently upgraded to the oldest supported version — so this pin is worth
+re-checking periodically, and the changelog is the place to do it.
 
 ## Installation
 

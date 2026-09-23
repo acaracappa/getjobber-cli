@@ -6,7 +6,7 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
 from getjobber_cli.auth.token_manager import get_token_manager
-from getjobber_cli.constants import API_BASE_URL, DEFAULT_TIMEOUT
+from getjobber_cli.constants import API_BASE_URL, API_VERSION, DEFAULT_TIMEOUT
 from getjobber_cli.utils.errors import GraphQLError, JobberAPIError, NotAuthenticatedError
 
 
@@ -27,13 +27,12 @@ def create_client(access_token: str, api_url: str = API_BASE_URL) -> Client:
         raise NotAuthenticatedError()
 
     # Configure transport with authentication
-    # Jobber requires X-JOBBER-GRAPHQL-VERSION; pin to a known stable schema date
     transport = RequestsHTTPTransport(
         url=api_url,
         headers={
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
-            "X-JOBBER-GRAPHQL-VERSION": "2025-04-16",
+            "X-JOBBER-GRAPHQL-VERSION": API_VERSION,
         },
         timeout=DEFAULT_TIMEOUT,
         verify=True,

@@ -26,11 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file holds plain JSON and is protected only by `0600` permissions. No code
   behaviour changed here; the documentation was wrong, and a reader could have
   accepted the fallback believing their tokens were encrypted at rest.
-- **Documented the real state of the pinned Jobber API version.** The README
-  claimed `2025-04-16` was "the latest active version as of 2026-07-23". It was
-  not the latest even then: Jobber had already published `2026-05-12` and four
-  other newer versions. The pin is still active, but its 18-month accessibility
-  window closes around 2026-10-16.
+- **Jobber GraphQL API version bumped from `2025-04-16` to `2026-05-12`.** The
+  old pin was six versions behind and close to the end of its 18-month
+  accessibility window (around 2026-10-16), after which Jobber silently upgrades
+  requests to the oldest supported version. Every documented change between the
+  two versions is additive — six new enum values, nothing removed or retyped —
+  so no query or mutation in this CLI is affected. The README had also claimed
+  the old pin was "the latest active version as of 2026-07-23", which was untrue
+  even then. The version now lives in `constants.py` as `API_VERSION` instead of
+  a string literal in the transport setup, so future bumps are a one-line
+  change.
 - All runtime and development dependencies upgraded; `cryptography` and
   `anyio` moved to versions that close four Dependabot security advisories.
   Both are transitive and unexercised by this CLI, so no behaviour changes.

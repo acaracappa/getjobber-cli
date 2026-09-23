@@ -5,6 +5,13 @@ API_BASE_URL = "https://api.getjobber.com/api/graphql"
 OAUTH_AUTHORIZE_URL = "https://api.getjobber.com/api/oauth/authorize"
 OAUTH_TOKEN_URL = "https://api.getjobber.com/api/oauth/token"
 
+# Jobber dates its API versions and requires one on every request via the
+# X-JOBBER-GRAPHQL-VERSION header. A version is supported for at least 12
+# months and stays accessible for up to 18 months from its release date, after
+# which requests are silently upgraded to the oldest supported version. Check
+# https://developer.getjobber.com/docs/changelog/ before bumping.
+API_VERSION = "2026-05-12"
+
 # OAuth Configuration
 DEFAULT_REDIRECT_URI = "http://localhost:8888/callback"
 CALLBACK_HOST = "localhost"
