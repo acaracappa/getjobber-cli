@@ -42,8 +42,12 @@ def _get_authenticated_client() -> GraphQLClient:
 
 
 def list_clients(
-    limit: Annotated[int, typer.Option(help="Number of clients to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    limit: Annotated[
+        int, typer.Option(help="Number of clients to retrieve")
+    ] = DEFAULT_ITEMS_PER_PAGE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """List all clients."""
     try:
@@ -218,7 +222,9 @@ def update_client(
 
         # Execute mutation
         gql_client = _get_authenticated_client()
-        result = gql_client.mutate(UPDATE_CLIENT, variables={"id": client_id, "input": client_input})
+        result = gql_client.mutate(
+            UPDATE_CLIENT, variables={"id": client_id, "input": client_input}
+        )
 
         # Check for errors
         if "clientUpdate" in result:
@@ -293,7 +299,9 @@ def delete_client(
 def search_clients(
     query: Annotated[str, typer.Argument(help="Search query")],
     limit: Annotated[int, typer.Option(help="Number of results")] = DEFAULT_ITEMS_PER_PAGE,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """Search for clients."""
     try:

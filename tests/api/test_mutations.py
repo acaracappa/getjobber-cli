@@ -5,11 +5,8 @@ from gql import gql
 
 from getjobber_cli.api import mutations
 
-
 MUTATION_CONSTANTS = [
-    name
-    for name in dir(mutations)
-    if name.isupper() and isinstance(getattr(mutations, name), str)
+    name for name in dir(mutations) if name.isupper() and isinstance(getattr(mutations, name), str)
 ]
 
 

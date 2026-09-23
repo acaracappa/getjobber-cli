@@ -102,7 +102,7 @@ class TestGetJob:
 class TestWriteCommandsGated:
     """Write commands are gated pending the v1.2.0 write redesign."""
 
-    @pytest.mark.parametrize("fn_name", ['create_job', 'update_job', 'complete_job'])
+    @pytest.mark.parametrize("fn_name", ["create_job", "update_job", "complete_job"])
     def test_gated(self, fn_name):
         fn = getattr(job_commands, fn_name)
         with pytest.raises(typer.Exit) as exc:

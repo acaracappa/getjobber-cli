@@ -102,7 +102,7 @@ class TestGetQuote:
 class TestWriteCommandsGated:
     """Write commands are gated pending the v1.2.0 write redesign."""
 
-    @pytest.mark.parametrize("fn_name", ['create_quote', 'send_quote', 'approve_quote'])
+    @pytest.mark.parametrize("fn_name", ["create_quote", "send_quote", "approve_quote"])
     def test_gated(self, fn_name):
         fn = getattr(quote_commands, fn_name)
         with pytest.raises(typer.Exit) as exc:

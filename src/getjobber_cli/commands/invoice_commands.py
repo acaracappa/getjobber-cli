@@ -34,10 +34,14 @@ def _get_authenticated_client() -> GraphQLClient:
 
 
 def list_invoices(
-    limit: Annotated[int, typer.Option(help="Number of invoices to retrieve")] = DEFAULT_ITEMS_PER_PAGE,
+    limit: Annotated[
+        int, typer.Option(help="Number of invoices to retrieve")
+    ] = DEFAULT_ITEMS_PER_PAGE,
     status: Annotated[Optional[str], typer.Option(help="Filter by status")] = None,
     unpaid: Annotated[bool, typer.Option(help="Show only unpaid invoices")] = False,
-    format: Annotated[str, typer.Option(help="Output format (table, json, csv, yaml)")] = OUTPUT_FORMAT_TABLE,
+    format: Annotated[
+        str, typer.Option(help="Output format (table, json, csv, yaml)")
+    ] = OUTPUT_FORMAT_TABLE,
 ):
     """List all invoices."""
     try:
@@ -54,7 +58,9 @@ def list_invoices(
         invoices = extract_list_data(result, "invoices")
 
         if unpaid:
-            invoices = [i for i in invoices if ((i.get("amounts") or {}).get("invoiceBalance") or 0) > 0]
+            invoices = [
+                i for i in invoices if ((i.get("amounts") or {}).get("invoiceBalance") or 0) > 0
+            ]
 
         if format == OUTPUT_FORMAT_TABLE:
             simplified = [

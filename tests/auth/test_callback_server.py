@@ -54,6 +54,7 @@ class TestCallbackServerLifecycle:
 class TestCallbackHandler:
     def test_captures_code_and_state(self, server):
         srv, port = server
+
         # Send a callback in a thread
         def post_callback():
             requests.get(

@@ -37,7 +37,9 @@ def execute_query(
                 print_error("No query provided")
                 raise typer.Exit(1)
             # Remove comment lines
-            query = "\n".join([line for line in query.split("\n") if not line.strip().startswith("#")])
+            query = "\n".join(
+                [line for line in query.split("\n") if not line.strip().startswith("#")]
+            )
         elif file:
             # Read from file
             if not file.exists():
