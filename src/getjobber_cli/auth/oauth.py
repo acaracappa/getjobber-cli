@@ -115,7 +115,7 @@ class OAuthFlow:
                 error_message = error_data.get("error_description", "Token exchange failed")
                 raise OAuthError(error_message, error_code=error_data.get("error"))
 
-            token_response = response.json()
+            token_response: dict = response.json()
             return token_response
 
         except requests.exceptions.RequestException as e:
@@ -153,7 +153,7 @@ class OAuthFlow:
                 error_message = error_data.get("error_description", "Token refresh failed")
                 raise OAuthError(error_message, error_code=error_data.get("error"))
 
-            token_response = response.json()
+            token_response: dict = response.json()
             return token_response
 
         except requests.exceptions.RequestException as e:

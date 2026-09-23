@@ -3,7 +3,7 @@
 import csv
 import io
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, cast
 
 import yaml
 from rich.console import Console
@@ -19,7 +19,7 @@ from getjobber_cli.constants import (
 console = Console()
 
 
-def format_output(data: Any, format_type: str = OUTPUT_FORMAT_TABLE) -> str:
+def format_output(data: Any, format_type: str = OUTPUT_FORMAT_TABLE) -> Optional[str]:
     """Format data for output.
 
     Args:
@@ -36,7 +36,8 @@ def format_output(data: Any, format_type: str = OUTPUT_FORMAT_TABLE) -> str:
     elif format_type == OUTPUT_FORMAT_YAML:
         return format_yaml(data)
     elif format_type == OUTPUT_FORMAT_TABLE:
-        return format_table(data)
+        format_table(data)
+        return None
     else:
         # Default to JSON
         return format_json(data)
@@ -221,7 +222,7 @@ def extract_list_data(response: Dict, resource_key: str) -> List[Dict]:
         List of items.
     """
     if resource_key in response and "nodes" in response[resource_key]:
-        return response[resource_key]["nodes"]
+        return cast(List[Dict], response[resource_key]["nodes"])
     return []
 
 
@@ -235,4 +236,4 @@ def extract_single_data(response: Dict, resource_key: str) -> Dict:
     Returns:
         Item dictionary.
     """
-    return response.get(resource_key, {})
+    return cast(Dict, response.get(resource_key, {}))

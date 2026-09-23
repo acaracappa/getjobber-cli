@@ -1,6 +1,6 @@
 """Invoice management commands for GetJobber CLI."""
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -30,6 +30,8 @@ def _get_authenticated_client() -> GraphQLClient:
         raise NotAuthenticatedError()
 
     access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
     return GraphQLClient(access_token)
 
 
@@ -47,7 +49,7 @@ def list_invoices(
     try:
         client = _get_authenticated_client()
 
-        variables = {"first": limit}
+        variables: Dict[str, Any] = {"first": limit}
         # `status` maps to InvoiceStatusTypeEnum (draft, awaiting_payment, paid,
         # past_due, bad_debt, sent_not_due). There is no single "unpaid" status,
         # so --unpaid is applied client-side by outstanding balance.

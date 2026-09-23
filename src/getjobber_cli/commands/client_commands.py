@@ -38,6 +38,8 @@ def _get_authenticated_client() -> GraphQLClient:
         raise NotAuthenticatedError()
 
     access_token = token_manager.get_access_token()
+    if access_token is None:
+        raise NotAuthenticatedError()
     return GraphQLClient(access_token)
 
 
