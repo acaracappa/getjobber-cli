@@ -69,7 +69,13 @@ write redesign is planned for v1.2.0.
 - Python 3.10 or higher
 - GetJobber account with OAuth app credentials
 
-Targets Jobber GraphQL API version `2025-04-16` (the latest active version as of 2026-07-23), sent via the `X-JOBBER-GRAPHQL-VERSION` header.
+Targets Jobber GraphQL API version `2025-04-16`, sent via the
+`X-JOBBER-GRAPHQL-VERSION` header. That pin was last confirmed to be Jobber's
+latest active version on 2026-07-23. Jobber's documented policy is that a
+version stays supported for at least 12 months, so this pin is now past the
+window that guarantee covers and is worth re-checking against
+[Jobber's changelog](https://developer.getjobber.com/docs/changelog/) before the
+next release.
 
 ## Installation
 
@@ -83,7 +89,7 @@ cd getjobber-cli
 pip install -e .
 ```
 
-### Via pip (future)
+### Via pip
 
 ```bash
 pip install getjobber-cli
@@ -319,7 +325,13 @@ Authentication tokens are stored securely using the OS keychain:
 - **Windows**: Credential Manager
 - **Linux**: Secret Service
 
-If keychain is unavailable, tokens are stored in an encrypted file at `~/.getjobber/credentials.enc` with restricted permissions (0600).
+If the keychain is unavailable, tokens fall back to `~/.getjobber/credentials.enc`.
+**That file is not encrypted**, despite its `.enc` name: it holds the access and
+refresh tokens as plain JSON. Its only protection is filesystem permissions —
+the file is mode `0600` and the directory `0700`, so it is readable by your user
+account alone. Anything running as your user, or any backup that copies the
+file, can read those tokens. Prefer a working keychain where you can, and treat
+this file as a secret if you cannot.
 
 ## Troubleshooting
 

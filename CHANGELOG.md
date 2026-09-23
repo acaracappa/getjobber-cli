@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to log in.
 
 ### Changed
+- **Documentation corrected: the credential file fallback is not encrypted.** The
+  README, the privacy notice and the 1.0.0 changelog entry all described the
+  `~/.getjobber/credentials.enc` fallback as encrypted. It never has been — the
+  file holds plain JSON and is protected only by `0600` permissions. No code
+  behaviour changed here; the documentation was wrong, and a reader could have
+  accepted the fallback believing their tokens were encrypted at rest.
 - All runtime and development dependencies upgraded; `cryptography` and
   `anyio` moved to versions that close four Dependabot security advisories.
   Both are transitive and unexercised by this CLI, so no behaviour changes.
@@ -91,7 +97,7 @@ account; the write path is temporarily gated pending a redesign.
 - Client, job, quote, invoice management commands (CRUD + send/approve/complete).
 - Raw GraphQL query execution.
 - Multiple output formats: table, JSON, CSV, YAML.
-- OS-level keychain integration for secure token storage (macOS Keychain, Windows Credential Manager, Linux Secret Service), with encrypted file fallback.
+- OS-level keychain integration for secure token storage (macOS Keychain, Windows Credential Manager, Linux Secret Service), with a permissions-protected file fallback. (This entry originally said "encrypted file fallback"; the fallback has never been encrypted. Corrected in [Unreleased].)
 - `typing_extensions` declared as an explicit runtime dependency.
 
 ### Changed
