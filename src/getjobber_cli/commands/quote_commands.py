@@ -5,10 +5,9 @@ from typing import Any, Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from getjobber_cli.api.client import GraphQLClient
+from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.api.mutations import APPROVE_QUOTE, CREATE_QUOTE, SEND_QUOTE
 from getjobber_cli.api.queries import GET_QUOTE, LIST_QUOTES
-from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
 from getjobber_cli.utils.gating import write_command_pending
@@ -23,18 +22,6 @@ from getjobber_cli.utils.formatters import (
 )
 
 
-def _get_authenticated_client() -> GraphQLClient:
-    """Get authenticated GraphQL client."""
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
-    if access_token is None:
-        raise NotAuthenticatedError()
-    return GraphQLClient(access_token)
-
-
 def list_quotes(
     limit: Annotated[
         int, typer.Option(help="Number of quotes to retrieve")
@@ -46,7 +33,7 @@ def list_quotes(
 ):
     """List all quotes."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         variables: Dict[str, Any] = {"first": limit}
         if status:
@@ -87,7 +74,7 @@ def list_quotes(
 def get_quote(quote_id: Annotated[str, typer.Argument(help="Quote ID")]):
     """Get detailed quote information."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
         result = client.query(GET_QUOTE, variables={"id": quote_id})
         quote_data = extract_single_data(result, "quote")
 
@@ -122,7 +109,7 @@ def create_quote(
 
         quote_input = {"clientId": client_id, "title": title}
 
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(CREATE_QUOTE, variables={"input": quote_input})
 
         if "quoteCreate" in result:
@@ -163,7 +150,7 @@ def send_quote(
                 typer.echo("Send cancelled.")
                 raise typer.Exit(0)
 
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(SEND_QUOTE, variables={"id": quote_id})
 
         if "quoteSend" in result:
@@ -194,7 +181,7 @@ def approve_quote(
 ):
     """Approve a quote."""
     try:
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(APPROVE_QUOTE, variables={"id": quote_id})
 
         if "quoteApprove" in result:

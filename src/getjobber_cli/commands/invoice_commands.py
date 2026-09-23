@@ -5,10 +5,9 @@ from typing import Any, Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from getjobber_cli.api.client import GraphQLClient
+from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.api.mutations import CREATE_INVOICE, SEND_INVOICE
 from getjobber_cli.api.queries import GET_INVOICE, LIST_INVOICES
-from getjobber_cli.auth.token_manager import get_token_manager
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
 from getjobber_cli.utils.gating import write_command_pending
@@ -23,18 +22,6 @@ from getjobber_cli.utils.formatters import (
 )
 
 
-def _get_authenticated_client() -> GraphQLClient:
-    """Get authenticated GraphQL client."""
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
-    if access_token is None:
-        raise NotAuthenticatedError()
-    return GraphQLClient(access_token)
-
-
 def list_invoices(
     limit: Annotated[
         int, typer.Option(help="Number of invoices to retrieve")
@@ -47,7 +34,7 @@ def list_invoices(
 ):
     """List all invoices."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
 
         variables: Dict[str, Any] = {"first": limit}
         # `status` maps to InvoiceStatusTypeEnum (draft, awaiting_payment, paid,
@@ -97,7 +84,7 @@ def list_invoices(
 def get_invoice(invoice_id: Annotated[str, typer.Argument(help="Invoice ID")]):
     """Get detailed invoice information."""
     try:
-        client = _get_authenticated_client()
+        client = get_authenticated_client()
         result = client.query(GET_INVOICE, variables={"id": invoice_id})
         invoice_data = extract_single_data(result, "invoice")
 
@@ -141,7 +128,7 @@ def create_invoice(
         if client_id:
             invoice_input["clientId"] = client_id
 
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(CREATE_INVOICE, variables={"input": invoice_input})
 
         if "invoiceCreate" in result:
@@ -182,7 +169,7 @@ def send_invoice(
                 typer.echo("Send cancelled.")
                 raise typer.Exit(0)
 
-        gql_client = _get_authenticated_client()
+        gql_client = get_authenticated_client()
         result = gql_client.mutate(SEND_INVOICE, variables={"id": invoice_id})
 
         if "invoiceSend" in result:
