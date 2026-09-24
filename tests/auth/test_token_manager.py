@@ -14,7 +14,7 @@ from getjobber_cli.constants import (
     KEYRING_USERNAME,
     TOKEN_EXPIRY_BUFFER,
 )
-from getjobber_cli.utils.errors import TokenStorageError
+from getjobber_cli.utils.errors import OAuthError, TokenStorageError
 
 
 @pytest.fixture
@@ -226,3 +226,73 @@ class TestIsAuthenticated:
 class TestGetTokenManagerHelper:
     def test_returns_instance(self):
         assert isinstance(get_token_manager(), TokenManager)
+
+
+class TestAutomaticRefresh:
+    """get_access_token() renews an expired token instead of giving up."""
+
+    @pytest.fixture
+    def expired(self, token_manager_with_keyring):
+        tm = token_manager_with_keyring
+        tm.store_tokens(access_token="old", refresh_token="refresh-me", expires_in=-1)
+        assert tm.is_expired(tm.get_tokens())
+        return tm
+
+    @pytest.fixture
+    def configured(self):
+        with patch("getjobber_cli.auth.token_manager.get_config") as get_cfg:
+            cfg = get_cfg.return_value
+            cfg.is_configured.return_value = True
+            cfg.get.side_effect = lambda k, d=None: {"client_id": "id", "client_secret": "sec"}.get(
+                k, d
+            )
+            yield cfg
+
+    def test_expired_token_is_refreshed(self, expired, configured):
+        with patch("getjobber_cli.auth.token_manager.OAuthFlow") as flow:
+            flow.return_value.refresh_access_token.return_value = {
+                "access_token": "fresh",
+                "refresh_token": "new-refresh",
+                "expires_in": 3600,
+            }
+            assert expired.get_access_token() == "fresh"
+        # the new pair is persisted, not just returned
+        stored = expired.get_tokens()
+        assert stored["access_token"] == "fresh"
+        assert stored["refresh_token"] == "new-refresh"
+
+    def test_refresh_reuses_old_refresh_token_when_none_returned(self, expired, configured):
+        with patch("getjobber_cli.auth.token_manager.OAuthFlow") as flow:
+            flow.return_value.refresh_access_token.return_value = {
+                "access_token": "fresh",
+                "expires_in": 3600,
+            }
+            assert expired.get_access_token() == "fresh"
+        assert expired.get_tokens()["refresh_token"] == "refresh-me"
+
+    def test_valid_token_is_not_refreshed(self, token_manager_with_keyring, configured):
+        tm = token_manager_with_keyring
+        tm.store_tokens(access_token="still-good", refresh_token="r", expires_in=3600)
+        with patch("getjobber_cli.auth.token_manager.OAuthFlow") as flow:
+            assert tm.get_access_token() == "still-good"
+            flow.assert_not_called()
+
+    def test_provider_rejection_returns_none(self, expired, configured):
+        with patch("getjobber_cli.auth.token_manager.OAuthFlow") as flow:
+            flow.return_value.refresh_access_token.side_effect = OAuthError("bad refresh token")
+            assert expired.get_access_token() is None
+
+    def test_no_refresh_token_returns_none(self, token_manager_with_keyring, configured):
+        tm = token_manager_with_keyring
+        tm.store_tokens(access_token="old", refresh_token="", expires_in=-1)
+        assert tm.get_access_token() is None
+        assert tm.refresh_tokens() is False
+
+    def test_unconfigured_credentials_returns_none(self, expired):
+        with patch("getjobber_cli.auth.token_manager.get_config") as get_cfg:
+            get_cfg.return_value.is_configured.return_value = False
+            assert expired.get_access_token() is None
+
+    def test_no_tokens_at_all_returns_none(self, token_manager_with_keyring):
+        assert token_manager_with_keyring.get_access_token() is None
+        assert token_manager_with_keyring.refresh_tokens() is False

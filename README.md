@@ -51,7 +51,7 @@ write redesign is planned for v1.2.0.
 
 ## Features
 
-- **OAuth 2.0 Authentication** - Secure browser-based authentication, with a stored refresh token you renew via `getjobber-cli auth refresh`
+- **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
 - **Client Management** - List, retrieve, and search clients (write commands pending v1.2.0)
 - **Job Management** - List and retrieve jobs (write commands pending v1.2.0)
 - **Quote Management** - List and retrieve quotes (write commands pending v1.2.0)
@@ -356,15 +356,22 @@ If the browser doesn't open automatically, copy the URL from the terminal and pa
 
 ### Token expired
 
-**Tokens are not refreshed automatically.** When the access token expires, every
-command reports `Not authenticated` until you renew it. The refresh token is
-stored at login, so renewing does not require signing in again:
+Expired tokens are renewed automatically. When a command finds the access token
+expired, it exchanges the stored refresh token for a new one and carries on, so
+you should not normally see an expiry at all. `getjobber-cli auth status` reports
+an expired-but-recoverable token rather than claiming you are signed out.
+
+To renew immediately instead of waiting for the next command:
 
 ```bash
 getjobber-cli auth refresh
 ```
 
-Or login again:
+Automatic renewal needs the stored refresh token and your configured OAuth
+credentials. If either is missing, or Jobber rejects the refresh (a revoked or
+long-unused refresh token), commands report `Not authenticated` and you need to
+sign in again:
+
 ```bash
 getjobber-cli login
 ```

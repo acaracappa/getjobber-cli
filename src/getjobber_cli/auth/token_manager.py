@@ -15,7 +15,9 @@ from getjobber_cli.constants import (
     KEYRING_USERNAME,
     TOKEN_EXPIRY_BUFFER,
 )
-from getjobber_cli.utils.errors import TokenExpiredError, TokenStorageError
+from getjobber_cli.auth.oauth import OAuthFlow
+from getjobber_cli.utils.config import get_config
+from getjobber_cli.utils.errors import OAuthError, TokenExpiredError, TokenStorageError
 
 
 class TokenManager:
@@ -165,18 +167,58 @@ class TokenManager:
         # Consider token expired if it expires within buffer time
         return current_time >= (expires_at - TOKEN_EXPIRY_BUFFER)
 
-    def get_access_token(self) -> Optional[str]:
-        """Get valid access token.
+    def refresh_tokens(self) -> bool:
+        """Exchange the stored refresh token for a fresh access token.
 
         Returns:
-            Access token string, or None if no valid token available.
+            True if new tokens were stored, False if refreshing was not
+            possible — no stored tokens, no refresh token, OAuth credentials
+            not configured, or the provider rejected the refresh.
+        """
+        token_data = self.get_tokens()
+        if not token_data:
+            return False
+
+        refresh_token = token_data.get("refresh_token")
+        if not refresh_token:
+            return False
+
+        config = get_config()
+        if not config.is_configured():
+            return False
+
+        try:
+            response = OAuthFlow(
+                client_id=config.get("client_id"),
+                client_secret=config.get("client_secret"),
+            ).refresh_access_token(refresh_token)
+            self.store_tokens(
+                access_token=response["access_token"],
+                refresh_token=response.get("refresh_token", refresh_token),
+                expires_in=response.get("expires_in", DEFAULT_TOKEN_EXPIRY),
+                token_type=response.get("token_type", "Bearer"),
+            )
+        except (OAuthError, TokenStorageError, KeyError):
+            return False
+        return True
+
+    def get_access_token(self) -> Optional[str]:
+        """Get a valid access token, refreshing it first if it has expired.
+
+        Returns:
+            Access token string, or None if no valid token is available and
+            refreshing did not produce one.
         """
         token_data = self.get_tokens()
         if not token_data:
             return None
 
         if self.is_expired(token_data):
-            return None
+            if not self.refresh_tokens():
+                return None
+            token_data = self.get_tokens()
+            if not token_data or self.is_expired(token_data):
+                return None
 
         return token_data.get("access_token")
 
