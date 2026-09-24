@@ -612,9 +612,10 @@ wheels = [
 
 [[package]]
 name = "getjobber-cli"
-version = "1.2.0"
+version = "1.2.1"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "gql", extra = ["requests"] },
     { name = "keyring" },
     { name = "pyyaml" },
@@ -640,6 +641,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=26.0" },
+    { name = "click", specifier = ">=8.0" },
     { name = "gql", extras = ["requests"], specifier = ">=4.0" },
     { name = "keyring", specifier = ">=25.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.0" },

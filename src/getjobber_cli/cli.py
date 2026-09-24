@@ -104,9 +104,14 @@ def register_commands():
         # Register query command
         app.command(name="query")(query_commands.execute_query)
 
-    except ImportError as e:
-        # Commands not yet created, will be registered later
-        pass
+    except ImportError as e:  # pragma: no cover - import wiring failure
+        # Never swallow this. A missing dependency used to leave the CLI with no
+        # commands at all, exiting 0 from `--help` as though nothing were wrong.
+        raise ImportError(
+            f"getjobber-cli failed to load its commands: {e}. "
+            "This usually means the installation is incomplete; "
+            "try reinstalling with 'pip install --force-reinstall getjobber-cli'."
+        ) from e
 
 
 # Register commands
