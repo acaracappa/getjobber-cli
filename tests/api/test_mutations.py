@@ -32,10 +32,9 @@ def test_known_mutations_present():
         "UPDATE_JOB",
         "CLOSE_JOB",
         "CREATE_QUOTE",
-        "UPDATE_QUOTE",
         "CREATE_INVOICE",
         "UPDATE_INVOICE",
-        "SEND_INVOICE",
+        "MARK_INVOICE_SENT",
     ]
     for name in expected:
         assert hasattr(mutations, name), f"missing mutation constant {name}"

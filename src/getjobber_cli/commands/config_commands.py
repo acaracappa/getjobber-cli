@@ -17,6 +17,10 @@ def set_config(
         config.set(key, value)
         print_success(f"Configuration updated: {key}")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Failed to set configuration: {str(e)}")
         raise typer.Exit(1)
@@ -41,6 +45,10 @@ def get_config(
         else:
             print_info(f"{key}: {value}")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Failed to get configuration: {str(e)}")
         raise typer.Exit(1)
@@ -65,6 +73,10 @@ def list_config():
             else:
                 typer.echo(f"  {key}: {value}")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Failed to list configuration: {str(e)}")
         raise typer.Exit(1)
@@ -82,6 +94,10 @@ def reset_config():
         config.reset()
         print_success("Configuration reset to defaults")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Failed to reset configuration: {str(e)}")
         raise typer.Exit(1)

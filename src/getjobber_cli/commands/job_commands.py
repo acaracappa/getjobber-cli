@@ -9,9 +9,10 @@ from typing_extensions import Annotated
 
 from getjobber_cli.api.client import get_authenticated_client
 from getjobber_cli.api.mutations import CLOSE_JOB, CREATE_JOB, UPDATE_JOB
-from getjobber_cli.api.queries import GET_CLIENT_PROPERTIES, GET_JOB, LIST_JOBS
+from getjobber_cli.api.queries import GET_JOB, LIST_JOBS
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
+from getjobber_cli.utils.resolvers import resolve_property_id
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -44,35 +45,6 @@ class IncompleteVisits(str, Enum):
 
     DESTROY_ALL = "DESTROY_ALL"
     COMPLETE_PAST_DESTROY_FUTURE = "COMPLETE_PAST_DESTROY_FUTURE"
-
-
-def _resolve_property_id(gql_client, client_id: str) -> str:
-    """Find the property to attach a new job to.
-
-    Jobs belong to a property, not to a client. Most clients have exactly one,
-    so it can be resolved; when there are several the caller has to choose,
-    because picking one silently would put the job at the wrong address.
-    """
-    result = gql_client.query(GET_CLIENT_PROPERTIES, variables={"id": client_id})
-    client = result.get("client") or {}
-    properties = client.get("properties") or []
-
-    if not properties:
-        print_error(f"Client {client_id} has no properties; a job needs one.")
-        raise typer.Exit(1)
-    if len(properties) > 1:
-        print_error(
-            f"Client {client_id} has {len(properties)} properties. "
-            "Pass --property-id to choose one:"
-        )
-        for prop in properties:
-            address = prop.get("address") or {}
-            where = ", ".join(
-                part for part in (address.get("street1"), address.get("city")) if part
-            )
-            typer.echo(f"  {prop['id']}  {where}")
-        raise typer.Exit(1)
-    return str(properties[0]["id"])
 
 
 def list_jobs(
@@ -190,7 +162,7 @@ def create_job(
         gql_client = get_authenticated_client()
 
         if property_id is None:
-            property_id = _resolve_property_id(gql_client, client_id)
+            property_id = resolve_property_id(gql_client, client_id)
 
         # propertyId and invoicing are both required by JobCreateAttributes.
         job_input: Dict[str, Any] = {

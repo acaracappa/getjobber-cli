@@ -96,7 +96,7 @@ def register_commands():
         invoices_app.command(name="list")(invoice_commands.list_invoices)
         invoices_app.command(name="get")(invoice_commands.get_invoice)
         invoices_app.command(name="create")(invoice_commands.create_invoice)
-        invoices_app.command(name="send")(invoice_commands.send_invoice)
+        invoices_app.command(name="mark-sent")(invoice_commands.mark_invoice_sent)
         app.add_typer(invoices_app)
 
         # Register query command

@@ -1,6 +1,6 @@
 """Quote management commands for GetJobber CLI."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -10,7 +10,7 @@ from getjobber_cli.api.mutations import CREATE_QUOTE
 from getjobber_cli.api.queries import GET_QUOTE, LIST_QUOTES
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
-from getjobber_cli.utils.gating import write_command_pending
+from getjobber_cli.utils.resolvers import parse_line_items, resolve_property_id
 from getjobber_cli.utils.formatters import (
     extract_list_data,
     extract_single_data,
@@ -97,20 +97,49 @@ def get_quote(quote_id: Annotated[str, typer.Argument(help="Quote ID")]):
         raise typer.Exit(1)
 
 
-@write_command_pending
 def create_quote(
     client_id: Annotated[str, typer.Option(help="Client ID (required)")],
+    line_item: Annotated[
+        List[str],
+        typer.Option(help="Line item as name[:quantity[:unit_price]]; repeat for more (required)"),
+    ] = [],
+    property_id: Annotated[
+        Optional[str],
+        typer.Option(help="Property ID; resolved from the client when it has only one"),
+    ] = None,
     title: Annotated[Optional[str], typer.Option(help="Quote title")] = None,
+    save_to_products: Annotated[
+        bool,
+        typer.Option(help="Also save these line items to Products & Services"),
+    ] = False,
 ):
     """Create a new quote."""
     try:
+        if not line_item:
+            print_error("At least one --line-item is required, as name[:quantity[:unit_price]].")
+            raise typer.Exit(1)
+
         if not title:
             title = typer.prompt("Quote title")
 
-        quote_input = {"clientId": client_id, "title": title}
-
         gql_client = get_authenticated_client()
-        result = gql_client.mutate(CREATE_QUOTE, variables={"input": quote_input})
+
+        if property_id is None:
+            property_id = resolve_property_id(gql_client, client_id)
+
+        # QuoteCreateAttributes requires clientId, propertyId and line items;
+        # each line item requires saveToProductsAndServices.
+        quote_input: Dict[str, Any] = {
+            "clientId": client_id,
+            "propertyId": property_id,
+            "lineItems": parse_line_items(
+                line_item, extra={"saveToProductsAndServices": save_to_products}
+            ),
+        }
+        if title:
+            quote_input["title"] = title
+
+        result = gql_client.mutate(CREATE_QUOTE, variables={"attributes": quote_input})
 
         if "quoteCreate" in result:
             user_errors = result["quoteCreate"].get("userErrors", [])

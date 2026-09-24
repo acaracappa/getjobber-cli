@@ -1,25 +1,28 @@
 # Write command redesign (v1.3.0)
 
-Write commands have been gated since v1.1.0 because Jobber's current schema
-reworked the write surface. This records what the schema actually offers,
-verified by introspecting the live API on 2026-09-24 at version `2026-05-12`,
-and the decisions taken for each command.
+Write commands were gated from v1.1.0 because Jobber's current schema reworked
+the write surface. This records what the schema actually offers, verified by
+introspecting the live API on 2026-09-24 at version `2026-05-12`, and the
+decisions taken for each command.
+
+**Status: complete.** Every write command is rebuilt or removed, and the gate
+(`utils/gating.py`) has been deleted.
 
 ## Summary
 
 | CLI command | v1.0 mutation | Now | Action |
 |---|---|---|---|
-| `clients create` | `clientCreate` | exists, input renamed | rebuild |
-| `clients update` | `clientUpdate` | `clientEdit`, different shape | rebuild |
-| `clients delete` | `clientArchive` | exists, arg renamed | rename to `clients archive` |
-| `jobs create` | `jobCreate` | exists, new required inputs | rebuild |
-| `jobs update` | `jobEdit` | exists | rebuild |
-| `jobs complete` | `jobComplete` | **gone** → `jobClose` | rename to `jobs close` |
-| `quotes create` | `quoteCreate` | exists, new required inputs | rebuild |
-| `quotes send` | `quoteSend` | **gone, no equivalent** | remove |
-| `quotes approve` | `quoteApprove` | **gone, no equivalent** | remove |
-| `invoices create` | `invoiceCreate` | exists, new required inputs | rebuild |
-| `invoices send` | `invoiceSend` | **gone** → `invoiceMarkAsSent` | rename to `invoices mark-sent` |
+| `clients create` | `clientCreate` | exists, input renamed | rebuilt |
+| `clients update` | `clientUpdate` | `clientEdit`, different shape | rebuilt |
+| `clients delete` | `clientArchive` | exists, arg renamed | renamed `clients archive` |
+| `jobs create` | `jobCreate` | exists, new required inputs | rebuilt |
+| `jobs update` | `jobEdit` | exists | rebuilt |
+| `jobs complete` | `jobComplete` | **gone** → `jobClose` | renamed `jobs close` |
+| `quotes create` | `quoteCreate` | exists, new required inputs | rebuilt |
+| `quotes send` | `quoteSend` | **gone, no equivalent** | removed |
+| `quotes approve` | `quoteApprove` | **gone, no equivalent** | removed |
+| `invoices create` | `invoiceCreate` | exists, new required inputs | rebuilt |
+| `invoices send` | `invoiceSend` | **gone** → `invoiceMarkAsSent` | renamed `invoices mark-sent` |
 
 ## Commands being removed
 

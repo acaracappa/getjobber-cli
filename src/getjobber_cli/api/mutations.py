@@ -128,38 +128,20 @@ mutation CloseJob($jobId: EncodedId!, $input: JobCloseInput!) {
 
 # Quote Mutations
 CREATE_QUOTE = """
-mutation CreateQuote($input: QuoteInput!) {
-  quoteCreate(input: $input) {
+mutation CreateQuote($attributes: QuoteCreateAttributes!) {
+  quoteCreate(attributes: $attributes) {
     quote {
       id
       quoteNumber
       title
-      status
+      quoteStatus
       client {
         id
         firstName
         lastName
+        companyName
       }
-      totalAmount
       createdAt
-    }
-    userErrors {
-      message
-      path
-    }
-  }
-}
-"""
-
-UPDATE_QUOTE = """
-mutation UpdateQuote($id: ID!, $input: QuoteInput!) {
-  quoteUpdate(id: $id, input: $input) {
-    quote {
-      id
-      quoteNumber
-      title
-      status
-      updatedAt
     }
     userErrors {
       message
@@ -171,19 +153,19 @@ mutation UpdateQuote($id: ID!, $input: QuoteInput!) {
 
 # Invoice Mutations
 CREATE_INVOICE = """
-mutation CreateInvoice($input: InvoiceInput!) {
+mutation CreateInvoice($input: InvoiceCreateInput!) {
   invoiceCreate(input: $input) {
     invoice {
       id
       invoiceNumber
       subject
-      status
+      invoiceStatus
       client {
         id
         firstName
         lastName
+        companyName
       }
-      totalAmount
       createdAt
     }
     userErrors {
@@ -195,13 +177,13 @@ mutation CreateInvoice($input: InvoiceInput!) {
 """
 
 UPDATE_INVOICE = """
-mutation UpdateInvoice($id: ID!, $input: InvoiceInput!) {
-  invoiceUpdate(id: $id, input: $input) {
+mutation EditInvoice($invoiceId: EncodedId!, $input: InvoiceEditInput!) {
+  invoiceEdit(invoiceId: $invoiceId, input: $input) {
     invoice {
       id
       invoiceNumber
       subject
-      status
+      invoiceStatus
       updatedAt
     }
     userErrors {
@@ -212,14 +194,15 @@ mutation UpdateInvoice($id: ID!, $input: InvoiceInput!) {
 }
 """
 
-SEND_INVOICE = """
-mutation SendInvoice($id: ID!) {
-  invoiceSend(id: $id) {
+# invoiceSend no longer exists. invoiceMarkAsSent only flags the record; it does
+# not email the client.
+MARK_INVOICE_SENT = """
+mutation MarkInvoiceSent($id: EncodedId!) {
+  invoiceMarkAsSent(id: $id) {
     invoice {
       id
       invoiceNumber
-      status
-      sentAt
+      invoiceStatus
     }
     userErrors {
       message

@@ -60,6 +60,10 @@ def login():
     except OAuthError as e:
         print_error(f"Authentication failed: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
@@ -85,6 +89,10 @@ def logout():
         token_manager.clear_tokens()
         print_success("Successfully logged out.")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Error during logout: {str(e)}")
         raise typer.Exit(1)
@@ -129,6 +137,10 @@ def status():
                 print_error("Status: Not authenticated")
                 print_info("Run 'getjobber-cli login' to authenticate")
 
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Error checking status: {str(e)}")
         raise typer.Exit(1)
@@ -176,6 +188,10 @@ def refresh():
         print_error(f"Token refresh failed: {str(e)}")
         print_info("Please login again: getjobber-cli login")
         raise typer.Exit(1)
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Error refreshing token: {str(e)}")
         raise typer.Exit(1)
