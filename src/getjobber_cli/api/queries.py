@@ -63,6 +63,18 @@ query GetClient($id: EncodedId!) {
 }
 """
 
+# clientEdit has no "set" semantics for emails and phones: they are added,
+# edited by their own id, or deleted. Updating one means reading it first.
+GET_CLIENT_CONTACT_METHODS = """
+query GetClientContactMethods($id: EncodedId!) {
+  client(id: $id) {
+    id
+    emails { id address primary }
+    phones { id number primary }
+  }
+}
+"""
+
 SEARCH_CLIENTS = """
 query SearchClients($query: String!, $first: Int) {
   clients(first: $first, searchTerm: $query) {

@@ -32,27 +32,33 @@ A portable, Python-based CLI tool that provides terminal access to the GetJobber
 
 This tool is provided as-is with no warranties. You use it at your own risk. We collect no data and assume no liability for any impact to your GetJobber account.
 
-### Write commands are temporarily disabled
+### Write commands: partially restored
 
-As of v1.1.0 this CLI is **read-only**. Jobber's current GraphQL schema reworked
-the write surface: several mutations the write commands used (`invoiceSend`,
-`quoteSend`, `quoteApprove`, `jobComplete`) no longer exist, and the create
-mutations now require nested inputs the commands don't yet collect. Rather than
-fail with cryptic GraphQL errors, the eleven write commands below exit
-immediately with an explanatory message:
+Write commands were disabled in v1.1.0 because Jobber's current schema reworked
+the write surface. They are being rebuilt against it one resource at a time.
 
-`clients create` · `clients update` · `clients delete` · `jobs create` ·
-`jobs update` · `jobs complete` · `quotes create` · `quotes send` ·
-`quotes approve` · `invoices create` · `invoices send`
+**Working now:** `clients create`, `clients update`, `clients archive`.
 
-Everything else — `list`, `get`, `search`, `query`, and all authentication and
-configuration commands — is fully supported against the current schema. The
-write redesign is planned for v1.3.0.
+**Still disabled, pending v1.3.0:** `jobs create` · `jobs update` ·
+`jobs complete` · `quotes create` · `invoices create` · `invoices send`. These
+exit immediately with an explanatory message.
+
+**Removed permanently:** `quotes send` and `quotes approve`. Jobber's API no
+longer exposes any mutation that can send or approve a quote, so these cannot be
+rebuilt at all — use the Jobber web app. See
+[docs/write-redesign.md](docs/write-redesign.md).
+
+`clients delete` is now **`clients archive`**: Jobber has no client deletion, and
+the underlying mutation archives instead. The old name implied something the API
+does not do.
+
+All read commands — `list`, `get`, `search`, `query` — and every authentication
+and configuration command are fully supported.
 
 ## Features
 
 - **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
-- **Client Management** - List, retrieve, and search clients (write commands pending v1.3.0)
+- **Client Management** - Full support: list, retrieve, search, create, update, archive
 - **Job Management** - List and retrieve jobs (write commands pending v1.3.0)
 - **Quote Management** - List and retrieve quotes (write commands pending v1.3.0)
 - **Invoice Management** - List and retrieve invoices (write commands pending v1.3.0)
@@ -181,24 +187,24 @@ getjobber-cli clients list --limit=50 --format=json
 # Get client details
 getjobber-cli clients get CLIENT_ID
 
-# Create client (interactive) - pending v1.3.0
+# Create client (interactive)
 getjobber-cli clients create
 
-# Create client (with flags) - pending v1.3.0
+# Create client (with flags)
 getjobber-cli clients create \
   --first-name="John" \
   --last-name="Doe" \
   --email="john@example.com" \
   --phone="555-1234"
 
-# Update client - pending v1.3.0
+# Update client
 getjobber-cli clients update CLIENT_ID --email="newemail@example.com"
 
 # Search clients
 getjobber-cli clients search "company name"
 
-# Delete client - pending v1.3.0
-getjobber-cli clients delete CLIENT_ID
+# Archive client (Jobber has no delete; archiving is reversible in the web app)
+getjobber-cli clients archive CLIENT_ID
 ```
 
 ### Job Commands

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Client write commands work again.** `clients create`, `clients update` and
+  `clients archive` are rebuilt against the current schema and no longer gated.
+  The old versions could not have worked: they sent `email`/`phoneNumber`
+  strings where `ClientCreateInput` takes `emails`/`phones` lists of objects,
+  and called `clientUpdate`, which does not exist.
+- `docs/write-redesign.md` records the full v1.0 → current mapping for every
+  write command, verified by introspecting the live schema.
+
+### Changed
+- **`clients delete` is now `clients archive`.** Jobber has no client deletion;
+  the only mutation is `clientArchive`, and it is reversible. A command named
+  `delete` that archives is a trap.
+- **`clients update` reads before it writes.** `clientEdit` has no way to *set*
+  an email or phone — they are added, or edited by their own id. Updating a
+  contact method now looks up the existing one and edits it, instead of adding
+  a duplicate. A name-only update skips the lookup.
+
+### Removed
+- **`quotes send` and `quotes approve`.** Jobber's API exposes no mutation that
+  can send or approve anything — searching all 109 mutations for
+  send/approve/deliver/email/message/submit returns nothing. These cannot be
+  rebuilt; use the Jobber web app. Tests pin the removal so they are not
+  reintroduced.
+
 ## [1.2.1] — 2026-09-23
 
 ### Fixed

@@ -17,8 +17,6 @@ def _build_app():
     app.command(name="list")(quote_commands.list_quotes)
     app.command(name="get")(quote_commands.get_quote)
     app.command(name="create")(quote_commands.create_quote)
-    app.command(name="send")(quote_commands.send_quote)
-    app.command(name="approve")(quote_commands.approve_quote)
     return app
 
 
@@ -97,11 +95,37 @@ class TestGetQuote:
 
 
 class TestWriteCommandsGated:
-    """Write commands are gated pending the v1.2.0 write redesign."""
+    """Remaining quote write commands are gated pending the v1.3.0 redesign."""
 
-    @pytest.mark.parametrize("fn_name", ["create_quote", "send_quote", "approve_quote"])
+    @pytest.mark.parametrize("fn_name", ["create_quote"])
     def test_gated(self, fn_name):
         fn = getattr(quote_commands, fn_name)
         with pytest.raises(typer.Exit) as exc:
             fn()
         assert exc.value.exit_code == 2
+
+
+class TestRemovedCommands:
+    """quotes send/approve were removed: Jobber exposes no mutation for either.
+
+    Searching the schema for send/approve/deliver/email/message/submit returns
+    nothing, so these cannot be rebuilt. See docs/write-redesign.md.
+    """
+
+    @pytest.mark.parametrize("fn_name", ["send_quote", "approve_quote"])
+    def test_command_is_gone(self, fn_name):
+        assert not hasattr(quote_commands, fn_name)
+
+    @pytest.mark.parametrize("const", ["SEND_QUOTE", "APPROVE_QUOTE"])
+    def test_mutation_is_gone(self, const):
+        from getjobber_cli.api import mutations
+
+        assert not hasattr(mutations, const)
+
+    def test_not_registered_on_the_cli(self):
+        from typer.main import get_command
+
+        from getjobber_cli.cli import app
+
+        quotes = get_command(app).commands["quotes"].commands
+        assert "send" not in quotes and "approve" not in quotes

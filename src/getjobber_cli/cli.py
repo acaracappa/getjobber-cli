@@ -71,7 +71,7 @@ def register_commands():
         clients_app.command(name="get")(client_commands.get_client)
         clients_app.command(name="create")(client_commands.create_client)
         clients_app.command(name="update")(client_commands.update_client)
-        clients_app.command(name="delete")(client_commands.delete_client)
+        clients_app.command(name="archive")(client_commands.archive_client)
         clients_app.command(name="search")(client_commands.search_clients)
         app.add_typer(clients_app)
 
@@ -89,8 +89,6 @@ def register_commands():
         quotes_app.command(name="list")(quote_commands.list_quotes)
         quotes_app.command(name="get")(quote_commands.get_quote)
         quotes_app.command(name="create")(quote_commands.create_quote)
-        quotes_app.command(name="send")(quote_commands.send_quote)
-        quotes_app.command(name="approve")(quote_commands.approve_quote)
         app.add_typer(quotes_app)
 
         # Register invoice commands
