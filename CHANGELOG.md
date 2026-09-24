@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and called `clientUpdate`, which does not exist.
 - `docs/write-redesign.md` records the full v1.0 → current mapping for every
   write command, verified by introspecting the live schema.
+- **Quote and invoice write commands work again.** `quotes create` and
+  `invoices create` are rebuilt against the inputs the schema now requires:
+  both need line items, quotes need a property, and invoices need due details
+  and a tax calculation method. Line items are given as
+  `--line-item name[:quantity[:unit_price]]`, repeated.
 - **Job write commands work again.** `jobs create`, `jobs update` and
   `jobs close` are rebuilt and no longer gated. `jobs create` resolves the
   client's property automatically when there is exactly one, and refuses to
@@ -38,12 +43,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   handler in `job_commands` caught its own `typer.Exit`, so declining a prompt
   exited 1 and printed "Unexpected error: 0".
 
+- **`invoices send` is now `invoices mark-sent`.** `invoiceSend` no longer
+  exists, and `invoiceMarkAsSent` only flags the record — nothing in the current
+  API emails an invoice to a client. The command says so before acting.
+- **Every command module now re-raises `typer.Exit`.** `job_commands`,
+  `query_commands`, `config_commands` and `auth_commands` caught their own exit,
+  so declining a confirmation exited 1 and printed "Unexpected error: 0".
+
 ### Removed
 - **`quotes send` and `quotes approve`.** Jobber's API exposes no mutation that
   can send or approve anything — searching all 109 mutations for
   send/approve/deliver/email/message/submit returns nothing. These cannot be
   rebuilt; use the Jobber web app. Tests pin the removal so they are not
   reintroduced.
+- **The write-command gate.** `utils/gating.py` and every `@write_command_pending`
+  decorator are gone: no write command is gated any more.
 
 ## [1.2.1] — 2026-09-23
 

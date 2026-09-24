@@ -32,42 +32,34 @@ A portable, Python-based CLI tool that provides terminal access to the GetJobber
 
 This tool is provided as-is with no warranties. You use it at your own risk. We collect no data and assume no liability for any impact to your GetJobber account.
 
-### Write commands: partially restored
+### Write commands
 
-Write commands were disabled in v1.1.0 because Jobber's current schema reworked
-the write surface. They are being rebuilt against it one resource at a time.
+All write commands work again, rebuilt against Jobber's current schema. Three
+were renamed and two were removed, because the API no longer does what their
+old names promised:
 
-**Working now:** `clients create` · `clients update` · `clients archive` ·
-`jobs create` · `jobs update` · `jobs close`.
+| Old command | Now | Why |
+|---|---|---|
+| `clients delete` | `clients archive` | Jobber has no client deletion; archiving is reversible |
+| `jobs complete` | `jobs close` | `jobComplete` is gone; `jobClose` needs an `--incomplete-visits` decision |
+| `invoices send` | `invoices mark-sent` | `invoiceMarkAsSent` flags the record; **it does not email anyone** |
+| `quotes send` | *removed* | no mutation in the API can send a quote |
+| `quotes approve` | *removed* | no mutation in the API can approve a quote |
 
-**Still disabled, pending v1.3.0:** `quotes create` · `invoices create` ·
-`invoices send`. These exit immediately with an explanatory message.
+`jobs create` and `quotes create` need a property, which is resolved from the
+client automatically when the client has exactly one and reported when it has
+several. `quotes create` and `invoices create` need at least one `--line-item`,
+given as `name[:quantity[:unit_price]]`.
 
-**Removed permanently:** `quotes send` and `quotes approve`. Jobber's API no
-longer exposes any mutation that can send or approve a quote, so these cannot be
-rebuilt at all — use the Jobber web app. See
-[docs/write-redesign.md](docs/write-redesign.md).
-
-Two commands were renamed because the surviving mutation does something
-different from what the old name promised:
-
-- **`clients delete` → `clients archive`.** Jobber has no client deletion; the
-  mutation archives, and that is reversible.
-- **`jobs complete` → `jobs close`.** `jobComplete` is gone. `jobClose` requires
-  deciding what happens to visits that have not happened yet, via
-  `--incomplete-visits`. There is no default, because `DESTROY_ALL` deletes
-  visit records.
-
-All read commands — `list`, `get`, `search`, `query` — and every authentication
-and configuration command are fully supported.
+See [docs/write-redesign.md](docs/write-redesign.md) for the full mapping.
 
 ## Features
 
 - **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
 - **Client Management** - Full support: list, retrieve, search, create, update, archive
 - **Job Management** - Full support: list, retrieve, create, update, close
-- **Quote Management** - List and retrieve quotes (write commands pending v1.3.0)
-- **Invoice Management** - List and retrieve invoices (write commands pending v1.3.0)
+- **Quote Management** - List, retrieve, and create quotes
+- **Invoice Management** - List, retrieve, create, and mark invoices as sent
 - **Raw GraphQL Queries** - Execute custom GraphQL queries directly
 - **Multiple Output Formats** - Table, JSON, CSV, and YAML output formats
 - **Secure Token Storage** - OS-level keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
@@ -243,14 +235,10 @@ getjobber-cli quotes list --status=draft
 # Get quote details
 getjobber-cli quotes get QUOTE_ID
 
-# Create quote - pending v1.3.0
-getjobber-cli quotes create --client-id=CLIENT_ID --title="Service Quote"
+# Create quote (at least one --line-item required)
+getjobber-cli quotes create --client-id=CLIENT_ID --title="Tree removal" \
+  --line-item="Removal:1:850" --line-item="Haul away:1:150"
 
-# Send quote to client - pending v1.3.0
-getjobber-cli quotes send QUOTE_ID
-
-# Approve quote - pending v1.3.0
-getjobber-cli quotes approve QUOTE_ID
 ```
 
 ### Invoice Commands
@@ -263,14 +251,16 @@ getjobber-cli invoices list --unpaid
 # Get invoice details
 getjobber-cli invoices get INVOICE_ID
 
-# Create invoice from job - pending v1.3.0
-getjobber-cli invoices create --job-id=JOB_ID --subject="Service Invoice"
+# Create invoice (--client-id and at least one --line-item are required)
+getjobber-cli invoices create --client-id=CLIENT_ID --subject="Service Invoice" \
+  --line-item="Stump grinding:1:400" --net-days=30
 
-# Create invoice for client - pending v1.3.0
-getjobber-cli invoices create --client-id=CLIENT_ID --subject="Invoice"
+# Attach it to a job, and treat prices as tax-inclusive
+getjobber-cli invoices create --client-id=CLIENT_ID --job-id=JOB_ID \
+  --subject="Invoice" --line-item="Labour:4:95" --tax-method=INCLUSIVE
 
-# Send invoice to client - pending v1.3.0
-getjobber-cli invoices send INVOICE_ID
+# Mark invoice as sent (flags the record; does not email the client)
+getjobber-cli invoices mark-sent INVOICE_ID
 ```
 
 ### Raw GraphQL Query

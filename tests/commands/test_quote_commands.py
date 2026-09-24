@@ -94,15 +94,45 @@ class TestGetQuote:
         assert result.exit_code == 1
 
 
-class TestWriteCommandsGated:
-    """Remaining quote write commands are gated pending the v1.3.0 redesign."""
+class TestCreateQuote:
+    def _created(self, gql):
+        gql.mutate.return_value = {"quoteCreate": {"quote": {"id": "q1"}, "userErrors": []}}
 
-    @pytest.mark.parametrize("fn_name", ["create_quote"])
-    def test_gated(self, fn_name):
-        fn = getattr(quote_commands, fn_name)
-        with pytest.raises(typer.Exit) as exc:
-            fn()
-        assert exc.value.exit_code == 2
+    def test_sends_required_attributes(self, app, fake_client):
+        gql = fake_client
+        gql.query.return_value = {"client": {"id": "c1", "properties": [{"id": "p1"}]}}
+        self._created(gql)
+
+        result = runner.invoke(
+            app, ["create", "--client-id=c1", "--title=T", "--line-item=Trim:2:150"]
+        )
+
+        assert result.exit_code == 0
+        sent = gql.mutate.call_args.kwargs["variables"]["attributes"]
+        assert sent["clientId"] == "c1"
+        assert sent["propertyId"] == "p1"
+        assert sent["lineItems"] == [
+            {
+                "name": "Trim",
+                "quantity": 2.0,
+                "unitPrice": 150.0,
+                "saveToProductsAndServices": False,
+            }
+        ]
+
+    def test_line_items_are_required(self, app, fake_client):
+        result = runner.invoke(app, ["create", "--client-id=c1", "--title=T"])
+        assert result.exit_code == 1
+        fake_client.mutate.assert_not_called()
+
+    def test_bad_line_item_is_rejected(self, app, fake_client):
+        gql = fake_client
+        gql.query.return_value = {"client": {"id": "c1", "properties": [{"id": "p1"}]}}
+        result = runner.invoke(
+            app, ["create", "--client-id=c1", "--title=T", "--line-item=Trim:lots"]
+        )
+        assert result.exit_code == 1
+        gql.mutate.assert_not_called()
 
 
 class TestRemovedCommands:

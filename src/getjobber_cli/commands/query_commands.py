@@ -57,6 +57,10 @@ def execute_query(
     except GraphQLError as e:
         print_error(f"Query failed: {str(e)}")
         raise typer.Exit(1)
+    except typer.Exit:
+        # Without this, the handler below catches our own Exit(0) from a
+        # declined confirmation and turns it into a failure.
+        raise
     except Exception as e:
         print_error(f"Unexpected error: {str(e)}")
         raise typer.Exit(1)
