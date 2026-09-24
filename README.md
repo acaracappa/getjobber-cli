@@ -37,20 +37,26 @@ This tool is provided as-is with no warranties. You use it at your own risk. We 
 Write commands were disabled in v1.1.0 because Jobber's current schema reworked
 the write surface. They are being rebuilt against it one resource at a time.
 
-**Working now:** `clients create`, `clients update`, `clients archive`.
+**Working now:** `clients create` · `clients update` · `clients archive` ·
+`jobs create` · `jobs update` · `jobs close`.
 
-**Still disabled, pending v1.3.0:** `jobs create` · `jobs update` ·
-`jobs complete` · `quotes create` · `invoices create` · `invoices send`. These
-exit immediately with an explanatory message.
+**Still disabled, pending v1.3.0:** `quotes create` · `invoices create` ·
+`invoices send`. These exit immediately with an explanatory message.
 
 **Removed permanently:** `quotes send` and `quotes approve`. Jobber's API no
 longer exposes any mutation that can send or approve a quote, so these cannot be
 rebuilt at all — use the Jobber web app. See
 [docs/write-redesign.md](docs/write-redesign.md).
 
-`clients delete` is now **`clients archive`**: Jobber has no client deletion, and
-the underlying mutation archives instead. The old name implied something the API
-does not do.
+Two commands were renamed because the surviving mutation does something
+different from what the old name promised:
+
+- **`clients delete` → `clients archive`.** Jobber has no client deletion; the
+  mutation archives, and that is reversible.
+- **`jobs complete` → `jobs close`.** `jobComplete` is gone. `jobClose` requires
+  deciding what happens to visits that have not happened yet, via
+  `--incomplete-visits`. There is no default, because `DESTROY_ALL` deletes
+  visit records.
 
 All read commands — `list`, `get`, `search`, `query` — and every authentication
 and configuration command are fully supported.
@@ -59,7 +65,7 @@ and configuration command are fully supported.
 
 - **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
 - **Client Management** - Full support: list, retrieve, search, create, update, archive
-- **Job Management** - List and retrieve jobs (write commands pending v1.3.0)
+- **Job Management** - Full support: list, retrieve, create, update, close
 - **Quote Management** - List and retrieve quotes (write commands pending v1.3.0)
 - **Invoice Management** - List and retrieve invoices (write commands pending v1.3.0)
 - **Raw GraphQL Queries** - Execute custom GraphQL queries directly
@@ -217,14 +223,14 @@ getjobber-cli jobs list --status=active
 # Get job details
 getjobber-cli jobs get JOB_ID
 
-# Create job - pending v1.3.0
+# Create job (property resolved from the client when it has only one)
 getjobber-cli jobs create --client-id=CLIENT_ID --title="Lawn Maintenance"
 
-# Update job - pending v1.3.0
+# Update job
 getjobber-cli jobs update JOB_ID --title="Updated Title"
 
-# Complete job - pending v1.3.0
-getjobber-cli jobs complete JOB_ID
+# Close job (--incomplete-visits is required; DESTROY_ALL deletes visits)
+getjobber-cli jobs close JOB_ID --incomplete-visits=COMPLETE_PAST_DESTROY_FUTURE
 ```
 
 ### Quote Commands

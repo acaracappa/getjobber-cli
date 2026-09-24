@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and called `clientUpdate`, which does not exist.
 - `docs/write-redesign.md` records the full v1.0 → current mapping for every
   write command, verified by introspecting the live schema.
+- **Job write commands work again.** `jobs create`, `jobs update` and
+  `jobs close` are rebuilt and no longer gated. `jobs create` resolves the
+  client's property automatically when there is exactly one, and refuses to
+  guess when there are several.
 
 ### Changed
 - **`clients delete` is now `clients archive`.** Jobber has no client deletion;
@@ -24,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an email or phone — they are added, or edited by their own id. Updating a
   contact method now looks up the existing one and edits it, instead of adding
   a duplicate. A name-only update skips the lookup.
+
+- **`jobs complete` is now `jobs close`.** `jobComplete` no longer exists.
+  `jobClose` requires `--incomplete-visits`, which has no default because
+  `DESTROY_ALL` deletes visit records; choosing it prompts unless `--force`.
+- **`jobs update --status` is gone.** `JobEditInput` has no status field; job
+  status changes through closing and reopening, not editing.
+- **Job commands no longer turn a cancelled confirmation into a failure.** Every
+  handler in `job_commands` caught its own `typer.Exit`, so declining a prompt
+  exited 1 and printed "Unexpected error: 0".
 
 ### Removed
 - **`quotes send` and `quotes approve`.** Jobber's API exposes no mutation that
