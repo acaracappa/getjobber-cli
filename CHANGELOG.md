@@ -20,11 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to log in.
 
 ### Changed
-- **Documentation corrected: token refresh is manual, not automatic.** The README
-  advertised "automatic token refresh" and told users tokens "are automatically
-  refreshed when they expire". Neither is true: `get_access_token()` returns
-  `None` once the token expires and nothing consults the stored refresh token, so
-  every command reports `Not authenticated` until `auth refresh` is run by hand.
+- **Access tokens now refresh automatically.** `get_access_token()` exchanges the
+  stored refresh token for a new one when the current token has expired, so
+  commands no longer fail with `Not authenticated` an hour after login. The
+  README had advertised this behaviour since 1.0.0 without it existing; it now
+  exists. `auth refresh` remains for renewing on demand and shares the same
+  implementation, and `auth status` distinguishes an expired-but-recoverable
+  token from being signed out entirely.
 - **Documentation corrected: the credential file fallback is not encrypted.** The
   README, the privacy notice and the 1.0.0 changelog entry all described the
   `~/.getjobber/credentials.enc` fallback as encrypted. It never has been — the

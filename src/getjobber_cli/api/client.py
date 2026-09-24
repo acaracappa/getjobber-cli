@@ -162,17 +162,16 @@ class GraphQLClient:
 def get_authenticated_client() -> "GraphQLClient":
     """Build a GraphQL client from the stored credentials.
 
+    An expired token is refreshed automatically when a refresh token and
+    OAuth credentials are available.
+
     Returns:
         GraphQLClient instance.
 
     Raises:
         NotAuthenticatedError: If there is no usable access token.
     """
-    token_manager = get_token_manager()
-    if not token_manager.is_authenticated():
-        raise NotAuthenticatedError()
-
-    access_token = token_manager.get_access_token()
+    access_token = get_token_manager().get_access_token()
     if access_token is None:
         raise NotAuthenticatedError()
     return GraphQLClient(access_token)

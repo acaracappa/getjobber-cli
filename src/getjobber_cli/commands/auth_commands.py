@@ -120,8 +120,14 @@ def status():
                 print_info(f"Token expires: {expiry_datetime.strftime('%Y-%m-%d %H:%M:%S')}")
                 print_info(f"Time remaining: {str(time_remaining).split('.')[0]}")
         else:
-            print_error("Status: Not authenticated")
-            print_info("Run 'getjobber-cli login' to authenticate")
+            token_data = token_manager.get_tokens()
+            if token_data and token_data.get("refresh_token") and config.is_configured():
+                # Expired but recoverable: the next command refreshes on its own.
+                print_info("Status: Token expired (refreshes automatically on next command)")
+                print_info("Run 'getjobber-cli auth refresh' to renew it now")
+            else:
+                print_error("Status: Not authenticated")
+                print_info("Run 'getjobber-cli login' to authenticate")
 
     except Exception as e:
         print_error(f"Error checking status: {str(e)}")
@@ -151,21 +157,12 @@ def refresh():
             print_error("OAuth credentials not configured.")
             raise typer.Exit(1)
 
-        client_id = config.get("client_id")
-        client_secret = config.get("client_secret")
-
-        # Refresh token
+        # Refresh token — same path the client uses automatically on expiry
         print_info("Refreshing access token...")
-        oauth_flow = OAuthFlow(client_id=client_id, client_secret=client_secret)
-        token_response = oauth_flow.refresh_access_token(refresh_token)
-
-        # Store new tokens
-        token_manager.store_tokens(
-            access_token=token_response["access_token"],
-            refresh_token=token_response.get("refresh_token", refresh_token),
-            expires_in=token_response.get("expires_in", 3600),
-            token_type=token_response.get("token_type", "Bearer"),
-        )
+        if not token_manager.refresh_tokens():
+            print_error("Token refresh failed.")
+            print_info("Please login again: getjobber-cli login")
+            raise typer.Exit(1)
 
         print_success("Access token refreshed successfully!")
 

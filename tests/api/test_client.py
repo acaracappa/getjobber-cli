@@ -148,14 +148,16 @@ class TestGetAuthenticatedClient:
     def test_returns_client_for_stored_token(self, token_manager):
         assert isinstance(get_authenticated_client(), GraphQLClient)
 
-    def test_unauthenticated_raises(self, token_manager):
-        token_manager.is_authenticated.return_value = False
-        with pytest.raises(NotAuthenticatedError):
-            get_authenticated_client()
-
     def test_missing_token_raises(self, token_manager):
-        # is_authenticated() can pass while the token itself is gone, e.g. the
-        # keyring entry was cleared between the check and the read.
+        # get_access_token() returns None when there is no token and refreshing
+        # could not produce one.
         token_manager.get_access_token.return_value = None
         with pytest.raises(NotAuthenticatedError):
             get_authenticated_client()
+
+    def test_does_not_gate_on_is_authenticated(self, token_manager):
+        # An expired token must still reach get_access_token(), which refreshes.
+        # Gating on is_authenticated() first would make that unreachable.
+        token_manager.is_authenticated.return_value = False
+        token_manager.get_access_token.return_value = "refreshed"
+        assert isinstance(get_authenticated_client(), GraphQLClient)
