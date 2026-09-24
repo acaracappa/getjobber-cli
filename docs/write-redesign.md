@@ -93,9 +93,46 @@ Required: `modifyIncompleteVisitsBy: IncompleteVisitDecisionEnum!` —
 job forces a decision about outstanding visits, which the CLI must surface
 rather than choose silently.
 
-## Verification policy
+## Verification
 
-Write commands are covered by unit tests against a mocked transport. They are
-not exercised against a live Jobber account during development, because doing so
-creates real records in a real business's data. Live verification is a
-deliberate, human-run step before release.
+Write commands are covered by unit tests against a mocked transport. Beyond
+that, what could be verified against the live API was, and what could not is
+recorded here rather than left implicit.
+
+### Verified against the live API (2026-09-24, API version 2026-05-12)
+
+- **The full client cycle.** `clients create` → `clients update` →
+  `clients get` → `clients archive`, run end to end against a real account with
+  a `ZZ-CLI-VERIFY` record, then archived and confirmed absent from the active
+  client list. The update exercised the differential contact-method path: the
+  existing email was edited in place by its id, not duplicated.
+- **Every mutation document.** All ten validate against the live schema — type
+  names, argument names and selection fields.
+- **Every variable payload.** The exact structures the commands build are
+  accepted by the schema's own type coercion, including both `jobClose`
+  branches, `emailsToAdd` vs `emailsToEdit`, and the nested `invoicing`,
+  `dueDetails`, `tax` and `lineItems` shapes.
+
+This covers the failure mode that broke the previous implementation: wrong
+input type names, renamed mutations, and renamed arguments.
+
+### Not verified, and why
+
+`jobs create`, `quotes create`, `invoices create` and `invoices mark-sent` have
+not been executed against a live account, because **the API offers no way to
+undo them**:
+
+| Record | Cleanup available |
+|---|---|
+| client | `clientArchive` — reversible |
+| job | none; only `jobClose` / `jobReopen` |
+| quote | none |
+| invoice | `invoiceVoid` only — the record remains |
+
+Creating test jobs, quotes or invoices in a production account leaves records
+that cannot be deleted, and a test invoice would persist in the business's
+financial data. Executing them is therefore a deliberate decision for the
+account owner, ideally against a sandbox.
+
+The residual risk is business-logic rejection: a payload the schema accepts but
+Jobber refuses for semantic reasons. Schema validation cannot detect that.
