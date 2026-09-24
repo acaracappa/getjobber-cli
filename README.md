@@ -47,15 +47,15 @@ immediately with an explanatory message:
 
 Everything else — `list`, `get`, `search`, `query`, and all authentication and
 configuration commands — is fully supported against the current schema. The
-write redesign is planned for v1.2.0.
+write redesign is planned for v1.3.0.
 
 ## Features
 
 - **OAuth 2.0 Authentication** - Secure browser-based authentication with automatic token refresh
-- **Client Management** - List, retrieve, and search clients (write commands pending v1.2.0)
-- **Job Management** - List and retrieve jobs (write commands pending v1.2.0)
-- **Quote Management** - List and retrieve quotes (write commands pending v1.2.0)
-- **Invoice Management** - List and retrieve invoices (write commands pending v1.2.0)
+- **Client Management** - List, retrieve, and search clients (write commands pending v1.3.0)
+- **Job Management** - List and retrieve jobs (write commands pending v1.3.0)
+- **Quote Management** - List and retrieve quotes (write commands pending v1.3.0)
+- **Invoice Management** - List and retrieve invoices (write commands pending v1.3.0)
 - **Raw GraphQL Queries** - Execute custom GraphQL queries directly
 - **Multiple Output Formats** - Table, JSON, CSV, and YAML output formats
 - **Secure Token Storage** - OS-level keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
@@ -181,23 +181,23 @@ getjobber-cli clients list --limit=50 --format=json
 # Get client details
 getjobber-cli clients get CLIENT_ID
 
-# Create client (interactive) - pending v1.2.0
+# Create client (interactive) - pending v1.3.0
 getjobber-cli clients create
 
-# Create client (with flags) - pending v1.2.0
+# Create client (with flags) - pending v1.3.0
 getjobber-cli clients create \
   --first-name="John" \
   --last-name="Doe" \
   --email="john@example.com" \
   --phone="555-1234"
 
-# Update client - pending v1.2.0
+# Update client - pending v1.3.0
 getjobber-cli clients update CLIENT_ID --email="newemail@example.com"
 
 # Search clients
 getjobber-cli clients search "company name"
 
-# Delete client - pending v1.2.0
+# Delete client - pending v1.3.0
 getjobber-cli clients delete CLIENT_ID
 ```
 
@@ -211,13 +211,13 @@ getjobber-cli jobs list --status=active
 # Get job details
 getjobber-cli jobs get JOB_ID
 
-# Create job - pending v1.2.0
+# Create job - pending v1.3.0
 getjobber-cli jobs create --client-id=CLIENT_ID --title="Lawn Maintenance"
 
-# Update job - pending v1.2.0
+# Update job - pending v1.3.0
 getjobber-cli jobs update JOB_ID --title="Updated Title"
 
-# Complete job - pending v1.2.0
+# Complete job - pending v1.3.0
 getjobber-cli jobs complete JOB_ID
 ```
 
@@ -231,13 +231,13 @@ getjobber-cli quotes list --status=draft
 # Get quote details
 getjobber-cli quotes get QUOTE_ID
 
-# Create quote - pending v1.2.0
+# Create quote - pending v1.3.0
 getjobber-cli quotes create --client-id=CLIENT_ID --title="Service Quote"
 
-# Send quote to client - pending v1.2.0
+# Send quote to client - pending v1.3.0
 getjobber-cli quotes send QUOTE_ID
 
-# Approve quote - pending v1.2.0
+# Approve quote - pending v1.3.0
 getjobber-cli quotes approve QUOTE_ID
 ```
 
@@ -251,13 +251,13 @@ getjobber-cli invoices list --unpaid
 # Get invoice details
 getjobber-cli invoices get INVOICE_ID
 
-# Create invoice from job - pending v1.2.0
+# Create invoice from job - pending v1.3.0
 getjobber-cli invoices create --job-id=JOB_ID --subject="Service Invoice"
 
-# Create invoice for client - pending v1.2.0
+# Create invoice for client - pending v1.3.0
 getjobber-cli invoices create --client-id=CLIENT_ID --subject="Invoice"
 
-# Send invoice to client - pending v1.2.0
+# Send invoice to client - pending v1.3.0
 getjobber-cli invoices send INVOICE_ID
 ```
 

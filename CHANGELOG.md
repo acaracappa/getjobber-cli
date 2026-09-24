@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] — 2026-09-23
 
 ### Fixed
 - **`query --interactive` no longer crashes.** The command called
@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   checking for `None`, so a token cleared between the authentication check
   and the read surfaced as an unrelated downstream error instead of a prompt
   to log in.
+
+- **`--version` no longer reports a stale number.** `APP_VERSION` was a
+  hard-coded copy in `constants.py` that drifted from `pyproject.toml`; it is now
+  read from installed package metadata, with a test asserting the two agree.
 
 ### Changed
 - **Access tokens now refresh automatically.** `get_access_token()` exchanges the
@@ -53,6 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The authenticated-client helper, previously copy-pasted into all five
   command modules, now lives once in `getjobber_cli.api.client` as
   `get_authenticated_client()`.
+
+- **The write redesign moves from v1.2.0 to v1.3.0.** This release takes the
+  1.2.0 number because automatic token refresh is new functionality rather than
+  a fix. The gating message and README now name v1.3.0, so the version users are
+  told to wait for stays accurate.
 
 ### Added
 - `black --check` and `mypy` run as blocking CI checks alongside the test
@@ -123,4 +132,7 @@ account; the write path is temporarily gated pending a redesign.
 - Development Status classifier upgraded from Alpha to Production/Stable.
 - README: added project context section, maintainer attribution, fixed placeholder URLs.
 
+[1.2.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.2.0
+[1.1.1]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.1.1
+[1.1.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.1.0
 [1.0.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.0.0

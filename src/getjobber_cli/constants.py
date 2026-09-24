@@ -1,5 +1,8 @@
 """Constants for GetJobber CLI."""
 
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _pkg_version
+
 # API URLs
 API_BASE_URL = "https://api.getjobber.com/api/graphql"
 OAUTH_AUTHORIZE_URL = "https://api.getjobber.com/api/oauth/authorize"
@@ -59,5 +62,12 @@ VALID_OUTPUT_FORMATS = [
 
 # CLI Metadata
 APP_NAME = "getjobber-cli"
-APP_VERSION = "1.1.1"
+
+# Read the version from installed package metadata rather than repeating it
+# here. A hard-coded copy is a second source of truth that drifts from
+# pyproject.toml, which is exactly what happened before 1.2.0.
+try:
+    APP_VERSION = _pkg_version(APP_NAME)
+except PackageNotFoundError:  # pragma: no cover - source tree without an install
+    APP_VERSION = "0.0.0+unknown"
 APP_DESCRIPTION = "CLI tool for accessing the GetJobber CRM GraphQL API"
