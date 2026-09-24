@@ -52,3 +52,43 @@ jobs:
 
       - name: Type check
         run: mypy src/
+
+  install:
+    # Installs WITHOUT dev extras, which is how users get it. The test matrix
+    # installs ".[dev]", so a runtime dependency satisfied only by a dev tool
+    # (as click was by black in 1.2.0) passes there and breaks in the wild.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.10"
+
+      - name: Build and install the wheel
+        run: |
+          pip install build
+          python -m build --wheel
+          pip install dist/*.whl
+
+      - name: CLI exposes its commands
+        run: |
+          getjobber-cli --version
+          for cmd in login logout query auth config clients jobs quotes invoices; do
+            getjobber-cli --help | grep -qE "^.[[:space:]]+$cmd[[:space:]]" \
+              || { echo "missing command: $cmd"; getjobber-cli --help; exit 1; }
+          done
+          echo "all nine top-level commands present"
+
+      - name: Command modules import cleanly
+        run: |
+          python -c "
+          from getjobber_cli.commands import (
+              auth_commands, client_commands, config_commands, invoice_commands,
+              job_commands, query_commands, quote_commands,
+          )
+          print('all command modules import without dev extras')
+          "

@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] — 2026-09-23
+
+### Fixed
+- **1.2.0 shipped with no working commands.** `query_commands` imports `click`,
+  which was never declared as a dependency. Typer 0.26+ does not depend on
+  click, so an ordinary `pip install getjobber-cli` had no click, the command
+  imports raised `ImportError`, and `register_commands()` swallowed it — leaving
+  a CLI that answered `--version` and `--help` with an exit code of 0 and not a
+  single command registered. `click>=8.0` is now a declared dependency.
+- **`register_commands()` no longer hides import failures.** It caught
+  `ImportError` and passed, a leftover from when the command modules did not yet
+  exist. That is what turned a missing dependency into a silently empty CLI; it
+  now raises with a message naming the failed import.
+
+### Added
+- A packaging test that parses every import in `src/` and asserts each
+  third-party module is a declared runtime dependency. It fails against 1.2.0.
+- An `install` CI job that builds the wheel and installs it **without** dev
+  extras, then checks all nine top-level commands are present. The existing
+  matrix installs `.[dev]`, where `black` supplies click transitively — which is
+  precisely why this passed CI and broke on PyPI.
+
 ## [1.2.0] — 2026-09-23
 
 ### Fixed
@@ -132,6 +154,7 @@ account; the write path is temporarily gated pending a redesign.
 - Development Status classifier upgraded from Alpha to Production/Stable.
 - README: added project context section, maintainer attribution, fixed placeholder URLs.
 
+[1.2.1]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.2.1
 [1.2.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.2.0
 [1.1.1]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.1.1
 [1.1.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.1.0
