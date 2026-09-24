@@ -6,7 +6,7 @@ import typer
 from typing_extensions import Annotated
 
 from getjobber_cli.api.client import get_authenticated_client
-from getjobber_cli.api.mutations import APPROVE_QUOTE, CREATE_QUOTE, SEND_QUOTE
+from getjobber_cli.api.mutations import CREATE_QUOTE
 from getjobber_cli.api.queries import GET_QUOTE, LIST_QUOTES
 from getjobber_cli.constants import DEFAULT_ITEMS_PER_PAGE, OUTPUT_FORMAT_TABLE
 from getjobber_cli.utils.errors import GraphQLError, NotAuthenticatedError
@@ -129,75 +129,6 @@ def create_quote(
         raise typer.Exit(1)
     except GraphQLError as e:
         print_error(f"Failed to create quote: {str(e)}")
-        raise typer.Exit(1)
-    except typer.Exit:
-        raise
-    except Exception as e:
-        print_error(f"Unexpected error: {str(e)}")
-        raise typer.Exit(1)
-
-
-@write_command_pending
-def send_quote(
-    quote_id: Annotated[str, typer.Argument(help="Quote ID")],
-    force: Annotated[bool, typer.Option("--force", "-f", help="Skip confirmation")] = False,
-):
-    """Send a quote to the client."""
-    try:
-        if not force:
-            confirm = typer.confirm(f"Are you sure you want to send quote {quote_id}?")
-            if not confirm:
-                typer.echo("Send cancelled.")
-                raise typer.Exit(0)
-
-        gql_client = get_authenticated_client()
-        result = gql_client.mutate(SEND_QUOTE, variables={"id": quote_id})
-
-        if "quoteSend" in result:
-            user_errors = result["quoteSend"].get("userErrors", [])
-            if user_errors:
-                for error in user_errors:
-                    print_error(f"{error.get('path', '')}: {error.get('message', '')}")
-                raise typer.Exit(1)
-
-            print_success(f"Quote {quote_id} sent successfully!")
-
-    except NotAuthenticatedError as e:
-        print_error(str(e))
-        raise typer.Exit(1)
-    except GraphQLError as e:
-        print_error(f"Failed to send quote: {str(e)}")
-        raise typer.Exit(1)
-    except typer.Exit:
-        raise
-    except Exception as e:
-        print_error(f"Unexpected error: {str(e)}")
-        raise typer.Exit(1)
-
-
-@write_command_pending
-def approve_quote(
-    quote_id: Annotated[str, typer.Argument(help="Quote ID")],
-):
-    """Approve a quote."""
-    try:
-        gql_client = get_authenticated_client()
-        result = gql_client.mutate(APPROVE_QUOTE, variables={"id": quote_id})
-
-        if "quoteApprove" in result:
-            user_errors = result["quoteApprove"].get("userErrors", [])
-            if user_errors:
-                for error in user_errors:
-                    print_error(f"{error.get('path', '')}: {error.get('message', '')}")
-                raise typer.Exit(1)
-
-            print_success(f"Quote {quote_id} approved successfully!")
-
-    except NotAuthenticatedError as e:
-        print_error(str(e))
-        raise typer.Exit(1)
-    except GraphQLError as e:
-        print_error(f"Failed to approve quote: {str(e)}")
         raise typer.Exit(1)
     except typer.Exit:
         raise

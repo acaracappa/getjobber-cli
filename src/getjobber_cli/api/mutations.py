@@ -2,7 +2,7 @@
 
 # Client Mutations
 CREATE_CLIENT = """
-mutation CreateClient($input: ClientInput!) {
+mutation CreateClient($input: ClientCreateInput!) {
   clientCreate(input: $input) {
     client {
       id
@@ -10,7 +10,8 @@ mutation CreateClient($input: ClientInput!) {
       lastName
       companyName
       email
-      phoneNumber
+      phone
+      isCompany
       createdAt
     }
     userErrors {
@@ -21,16 +22,19 @@ mutation CreateClient($input: ClientInput!) {
 }
 """
 
+# Edits are differential: emails and phones are added, edited by their own id,
+# or deleted, rather than assigned. See docs/write-redesign.md.
 UPDATE_CLIENT = """
-mutation UpdateClient($id: ID!, $input: ClientInput!) {
-  clientUpdate(id: $id, input: $input) {
+mutation EditClient($clientId: EncodedId!, $input: ClientEditInput!) {
+  clientEdit(clientId: $clientId, input: $input) {
     client {
       id
       firstName
       lastName
       companyName
       email
-      phoneNumber
+      phone
+      isCompany
       updatedAt
     }
     userErrors {
@@ -41,11 +45,16 @@ mutation UpdateClient($id: ID!, $input: ClientInput!) {
 }
 """
 
-DELETE_CLIENT = """
-mutation DeleteClient($id: ID!) {
-  clientArchive(id: $id) {
+# Jobber has no client delete; archiving is the only removal, and is reversible
+# with clientUnarchive.
+ARCHIVE_CLIENT = """
+mutation ArchiveClient($clientId: EncodedId!) {
+  clientArchive(clientId: $clientId) {
     client {
       id
+      firstName
+      lastName
+      companyName
     }
     userErrors {
       message
@@ -148,39 +157,6 @@ mutation UpdateQuote($id: ID!, $input: QuoteInput!) {
       title
       status
       updatedAt
-    }
-    userErrors {
-      message
-      path
-    }
-  }
-}
-"""
-
-SEND_QUOTE = """
-mutation SendQuote($id: ID!) {
-  quoteSend(id: $id) {
-    quote {
-      id
-      quoteNumber
-      status
-      sentAt
-    }
-    userErrors {
-      message
-      path
-    }
-  }
-}
-"""
-
-APPROVE_QUOTE = """
-mutation ApproveQuote($id: ID!) {
-  quoteApprove(id: $id) {
-    quote {
-      id
-      quoteNumber
-      status
     }
     userErrors {
       message
