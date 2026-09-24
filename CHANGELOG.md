@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to log in.
 
 ### Changed
+- **Documentation corrected: token refresh is manual, not automatic.** The README
+  advertised "automatic token refresh" and told users tokens "are automatically
+  refreshed when they expire". Neither is true: `get_access_token()` returns
+  `None` once the token expires and nothing consults the stored refresh token, so
+  every command reports `Not authenticated` until `auth refresh` is run by hand.
 - **Documentation corrected: the credential file fallback is not encrypted.** The
   README, the privacy notice and the 1.0.0 changelog entry all described the
   `~/.getjobber/credentials.enc` fallback as encrypted. It never has been — the
@@ -103,7 +108,7 @@ account; the write path is temporarily gated pending a redesign.
 
 ### Added
 - Initial public 1.0.0 release.
-- OAuth 2.0 authentication flow with browser-based code exchange and automatic refresh.
+- OAuth 2.0 authentication flow with browser-based code exchange, and a stored refresh token renewed on demand via `auth refresh`. (This entry originally said "automatic refresh"; refresh has always been manual. Corrected in [Unreleased].)
 - Client, job, quote, invoice management commands (CRUD + send/approve/complete).
 - Raw GraphQL query execution.
 - Multiple output formats: table, JSON, CSV, YAML.
