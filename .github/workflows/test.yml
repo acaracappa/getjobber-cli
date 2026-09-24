@@ -77,11 +77,17 @@ jobs:
       - name: CLI exposes its commands
         run: |
           getjobber-cli --version
-          for cmd in login logout query auth config clients jobs quotes invoices; do
-            getjobber-cli --help | grep -qE "^.[[:space:]]+$cmd[[:space:]]" \
-              || { echo "missing command: $cmd"; getjobber-cli --help; exit 1; }
-          done
-          echo "all nine top-level commands present"
+          getjobber-cli --help
+          python -c "
+          from typer.main import get_command
+          from getjobber_cli.cli import app
+          registered = set(get_command(app).commands)
+          expected = {'login', 'logout', 'query', 'auth', 'config',
+                      'clients', 'jobs', 'quotes', 'invoices'}
+          missing = expected - registered
+          assert not missing, f'commands missing from the installed CLI: {sorted(missing)}'
+          print('all nine top-level commands registered:', sorted(registered))
+          "
 
       - name: Command modules import cleanly
         run: |
