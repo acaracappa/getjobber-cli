@@ -92,6 +92,20 @@ query SearchClients($query: String!, $first: Int) {
 """
 
 # Job Queries
+# A job belongs to a property, not directly to a client, so creating one from a
+# client id means resolving the property first.
+GET_CLIENT_PROPERTIES = """
+query GetClientProperties($id: EncodedId!) {
+  client(id: $id) {
+    id
+    properties {
+      id
+      address { street1 city province }
+    }
+  }
+}
+"""
+
 LIST_JOBS = """
 query ListJobs($first: Int, $after: String, $status: JobStatusTypeEnum) {
   jobs(first: $first, after: $after, filter: {status: $status}) {

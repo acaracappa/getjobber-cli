@@ -81,7 +81,7 @@ def register_commands():
         jobs_app.command(name="get")(job_commands.get_job)
         jobs_app.command(name="create")(job_commands.create_job)
         jobs_app.command(name="update")(job_commands.update_job)
-        jobs_app.command(name="complete")(job_commands.complete_job)
+        jobs_app.command(name="close")(job_commands.close_job)
         app.add_typer(jobs_app)
 
         # Register quote commands

@@ -66,17 +66,18 @@ mutation ArchiveClient($clientId: EncodedId!) {
 
 # Job Mutations
 CREATE_JOB = """
-mutation CreateJob($input: JobInput!) {
+mutation CreateJob($input: JobCreateAttributes!) {
   jobCreate(input: $input) {
     job {
       id
       title
       jobNumber
-      status
+      jobStatus
       client {
         id
         firstName
         lastName
+        companyName
       }
       createdAt
     }
@@ -89,13 +90,13 @@ mutation CreateJob($input: JobInput!) {
 """
 
 UPDATE_JOB = """
-mutation UpdateJob($id: ID!, $input: JobInput!) {
-  jobUpdate(id: $id, input: $input) {
+mutation EditJob($jobId: EncodedId!, $input: JobEditInput!) {
+  jobEdit(jobId: $jobId, input: $input) {
     job {
       id
       title
       jobNumber
-      status
+      jobStatus
       updatedAt
     }
     userErrors {
@@ -106,13 +107,15 @@ mutation UpdateJob($id: ID!, $input: JobInput!) {
 }
 """
 
-COMPLETE_JOB = """
-mutation CompleteJob($id: ID!) {
-  jobComplete(id: $id) {
+# jobComplete no longer exists. jobClose is the replacement, and it requires an
+# explicit decision about visits that have not happened yet.
+CLOSE_JOB = """
+mutation CloseJob($jobId: EncodedId!, $input: JobCloseInput!) {
+  jobClose(jobId: $jobId, input: $input) {
     job {
       id
       title
-      status
+      jobStatus
       completedAt
     }
     userErrors {

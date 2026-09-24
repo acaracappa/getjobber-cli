@@ -18,7 +18,7 @@ def _build_app():
     app.command(name="get")(job_commands.get_job)
     app.command(name="create")(job_commands.create_job)
     app.command(name="update")(job_commands.update_job)
-    app.command(name="complete")(job_commands.complete_job)
+    app.command(name="close")(job_commands.close_job)
     return app
 
 
@@ -96,12 +96,124 @@ class TestGetJob:
         assert result.exit_code == 1
 
 
-class TestWriteCommandsGated:
-    """Write commands are gated pending the v1.2.0 write redesign."""
+class TestCreateJob:
+    def _created(self, gql):
+        gql.mutate.return_value = {
+            "jobCreate": {"job": {"id": "j1", "title": "Trim"}, "userErrors": []}
+        }
 
-    @pytest.mark.parametrize("fn_name", ["create_job", "update_job", "complete_job"])
-    def test_gated(self, fn_name):
-        fn = getattr(job_commands, fn_name)
-        with pytest.raises(typer.Exit) as exc:
-            fn()
-        assert exc.value.exit_code == 2
+    def test_resolves_the_single_property_and_sends_invoicing(self, app, fake_client):
+        gql = fake_client
+        gql.query.return_value = {"client": {"id": "c1", "properties": [{"id": "p1"}]}}
+        self._created(gql)
+
+        result = runner.invoke(app, ["create", "--client-id=c1", "--title=Trim"])
+
+        assert result.exit_code == 0
+        sent = gql.mutate.call_args.kwargs["variables"]["input"]
+        # JobCreateAttributes requires both of these; the old command sent neither.
+        assert sent["propertyId"] == "p1"
+        assert sent["invoicing"] == {
+            "invoicingType": "FIXED_PRICE",
+            "invoicingSchedule": "ON_COMPLETION",
+        }
+        assert "clientId" not in sent
+
+    def test_explicit_property_skips_the_lookup(self, app, fake_client):
+        gql = fake_client
+        self._created(gql)
+        result = runner.invoke(
+            app, ["create", "--client-id=c1", "--property-id=p9", "--title=Trim"]
+        )
+        assert result.exit_code == 0
+        gql.query.assert_not_called()
+        assert gql.mutate.call_args.kwargs["variables"]["input"]["propertyId"] == "p9"
+
+    def test_multiple_properties_refuses_to_guess(self, app, fake_client):
+        gql = fake_client
+        gql.query.return_value = {
+            "client": {"id": "c1", "properties": [{"id": "p1"}, {"id": "p2"}]}
+        }
+        result = runner.invoke(app, ["create", "--client-id=c1", "--title=Trim"])
+        assert result.exit_code == 1
+        gql.mutate.assert_not_called()
+        assert "p1" in result.output and "p2" in result.output
+
+    def test_no_properties_is_an_error(self, app, fake_client):
+        fake_client.query.return_value = {"client": {"id": "c1", "properties": []}}
+        result = runner.invoke(app, ["create", "--client-id=c1", "--title=Trim"])
+        assert result.exit_code == 1
+        fake_client.mutate.assert_not_called()
+
+    def test_invoicing_options_are_passed_through(self, app, fake_client):
+        gql = fake_client
+        self._created(gql)
+        result = runner.invoke(
+            app,
+            [
+                "create",
+                "--client-id=c1",
+                "--property-id=p1",
+                "--title=Trim",
+                "--invoicing-type=VISIT_BASED",
+                "--invoicing-schedule=PER_VISIT",
+            ],
+        )
+        assert result.exit_code == 0
+        assert gql.mutate.call_args.kwargs["variables"]["input"]["invoicing"] == {
+            "invoicingType": "VISIT_BASED",
+            "invoicingSchedule": "PER_VISIT",
+        }
+
+
+class TestUpdateJob:
+    def test_edits_by_job_id(self, app, fake_client):
+        gql = fake_client
+        gql.mutate.return_value = {"jobEdit": {"job": {"id": "j1"}, "userErrors": []}}
+        result = runner.invoke(app, ["update", "j1", "--title=New", "--instructions=Do it"])
+        assert result.exit_code == 0
+        sent = gql.mutate.call_args.kwargs["variables"]
+        assert sent["jobId"] == "j1"
+        assert sent["input"] == {"title": "New", "instructions": "Do it"}
+
+    def test_no_fields_exits_nonzero(self, app, fake_client):
+        result = runner.invoke(app, ["update", "j1"])
+        assert result.exit_code == 1
+
+
+class TestCloseJob:
+    def _closed(self, gql):
+        gql.mutate.return_value = {
+            "jobClose": {"job": {"id": "j1", "jobStatus": "archived"}, "userErrors": []}
+        }
+
+    def test_requires_the_incomplete_visit_decision(self, app, fake_client):
+        # No default: one of the choices deletes visit records.
+        result = runner.invoke(app, ["close", "j1"])
+        assert result.exit_code != 0
+        fake_client.mutate.assert_not_called()
+
+    def test_complete_past_needs_no_confirmation(self, app, fake_client):
+        gql = fake_client
+        self._closed(gql)
+        result = runner.invoke(
+            app, ["close", "j1", "--incomplete-visits=COMPLETE_PAST_DESTROY_FUTURE"]
+        )
+        assert result.exit_code == 0
+        assert gql.mutate.call_args.kwargs["variables"]["input"] == {
+            "modifyIncompleteVisitsBy": "COMPLETE_PAST_DESTROY_FUTURE"
+        }
+
+    def test_destroy_all_prompts_before_deleting(self, app, fake_client):
+        result = runner.invoke(app, ["close", "j1", "--incomplete-visits=DESTROY_ALL"], input="n\n")
+        assert result.exit_code == 0
+        fake_client.mutate.assert_not_called()
+
+    def test_destroy_all_proceeds_with_force(self, app, fake_client):
+        gql = fake_client
+        self._closed(gql)
+        result = runner.invoke(app, ["close", "j1", "--incomplete-visits=DESTROY_ALL", "--force"])
+        assert result.exit_code == 0
+        assert gql.mutate.call_args.kwargs["variables"]["input"] == {
+            "modifyIncompleteVisitsBy": "DESTROY_ALL"
+        }

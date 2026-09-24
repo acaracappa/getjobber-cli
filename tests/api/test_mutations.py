@@ -30,7 +30,7 @@ def test_known_mutations_present():
         "ARCHIVE_CLIENT",
         "CREATE_JOB",
         "UPDATE_JOB",
-        "COMPLETE_JOB",
+        "CLOSE_JOB",
         "CREATE_QUOTE",
         "UPDATE_QUOTE",
         "CREATE_INVOICE",
