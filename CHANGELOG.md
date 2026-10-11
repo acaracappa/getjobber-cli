@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+- `requests-oauthlib` and `oauthlib` are no longer dependencies. The OAuth flow
+  has always used `requests` directly; the only reference was an unused import.
+  `types-requests-oauthlib` is dropped from the `dev` extra with it.
+
 ## [1.3.1] — 2026-10-11
 
 ### Security
@@ -203,11 +210,11 @@ account; the write path is temporarily gated pending a redesign.
 
 ### Added
 - Initial public 1.0.0 release.
-- OAuth 2.0 authentication flow with browser-based code exchange, and a stored refresh token renewed on demand via `auth refresh`. (This entry originally said "automatic refresh"; refresh has always been manual. Corrected in [Unreleased].)
+- OAuth 2.0 authentication flow with browser-based code exchange, and a stored refresh token renewed on demand via `auth refresh`. (This entry originally said "automatic refresh"; refresh has always been manual. Corrected in [1.2.0].)
 - Client, job, quote, invoice management commands (CRUD + send/approve/complete).
 - Raw GraphQL query execution.
 - Multiple output formats: table, JSON, CSV, YAML.
-- OS-level keychain integration for secure token storage (macOS Keychain, Windows Credential Manager, Linux Secret Service), with a permissions-protected file fallback. (This entry originally said "encrypted file fallback"; the fallback has never been encrypted. Corrected in [Unreleased].)
+- OS-level keychain integration for secure token storage (macOS Keychain, Windows Credential Manager, Linux Secret Service), with a permissions-protected file fallback. (This entry originally said "encrypted file fallback"; the fallback has never been encrypted. Corrected in [1.2.0].)
 - `typing_extensions` declared as an explicit runtime dependency.
 
 ### Changed

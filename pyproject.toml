@@ -34,8 +34,6 @@ dependencies = [
     "click>=8.0",
     "gql[requests]>=4.0",
     "requests>=2.32",
-    "requests-oauthlib>=2.0",
-    "oauthlib>=4.0",
     "requests-toolbelt>=1.0",
     "keyring>=25.0",
     "rich>=15.0",
@@ -51,7 +49,6 @@ dev = [
     "mypy>=2.0",
     "responses>=0.26",
     "types-PyYAML>=6.0",
-    "types-requests-oauthlib>=2.0",
 ]
 
 [project.scripts]
