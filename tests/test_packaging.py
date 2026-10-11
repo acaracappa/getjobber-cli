@@ -42,7 +42,6 @@ def imported_top_level_modules():
 # Distributions whose import name differs from the package name.
 IMPORT_TO_DIST = {
     "yaml": "pyyaml",
-    "requests_oauthlib": "requests-oauthlib",
     "requests_toolbelt": "requests-toolbelt",
     "typing_extensions": "typing-extensions",
     "gql": "gql",

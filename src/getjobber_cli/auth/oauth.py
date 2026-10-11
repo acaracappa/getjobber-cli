@@ -6,7 +6,6 @@ import webbrowser
 from typing import Optional
 
 import requests
-from requests_oauthlib import OAuth2Session
 
 from getjobber_cli.auth.callback_server import OAuthCallbackServer
 from getjobber_cli.constants import (

@@ -20,7 +20,7 @@ pip install -e ".[dev]"
 ```
 
 This installs the CLI along with `pytest`, `pytest-cov`, `black`, `mypy`,
-`responses`, and the `types-PyYAML` and `types-requests-oauthlib` stub packages
+`responses`, and the `types-PyYAML` stub package
 for testing and linting.
 
 A `uv.lock` file is committed for reproducible development installs. If you use
