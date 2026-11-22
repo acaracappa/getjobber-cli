@@ -73,13 +73,13 @@ See [docs/write-redesign.md](docs/write-redesign.md) for the full mapping.
 - Python 3.10 or higher
 - GetJobber account with OAuth app credentials
 
-Targets Jobber GraphQL API version `2026-05-12`, sent via the
+Targets Jobber GraphQL API version `2026-09-25`, sent via the
 `X-JOBBER-GRAPHQL-VERSION` header and defined once as `API_VERSION` in
 `src/getjobber_cli/constants.py`.
 
-`2026-05-12` was Jobber's latest active version when checked against
+`2026-09-25` was Jobber's latest active version when checked against
 [Jobber's changelog](https://developer.getjobber.com/docs/changelog/) on
-2026-09-23. Jobber supports a version for a minimum of 12 months and keeps it
+2026-11-22. Jobber supports a version for a minimum of 12 months and keeps it
 accessible for up to 18 months from its release date, after which requests are
 silently upgraded to the oldest supported version — so this pin is worth
 re-checking periodically, and the changelog is the place to do it.
@@ -403,8 +403,8 @@ black src/ tests/
 mypy src/
 ```
 
-Both run as blocking CI checks, alongside the test suite on Python 3.10, 3.11,
-and 3.12.
+Both run as blocking CI checks, alongside the test suite on Python 3.10 through
+3.14.
 
 ### Reproducible installs
 

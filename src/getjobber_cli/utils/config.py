@@ -57,7 +57,7 @@ class Config:
     def _save(self) -> None:
         """Save configuration to file."""
         try:
-            with open(self.config_file, "w") as f:
+            with open(self.config_file, "w", opener=lambda p, fl: os.open(p, fl, 0o600)) as f:
                 json.dump(self._config, f, indent=2)
             # Set file permissions to 0600 (user read/write only)
             self.config_file.chmod(0o600)

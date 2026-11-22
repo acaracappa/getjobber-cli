@@ -1,5 +1,6 @@
 """Local HTTP server for OAuth callback handling."""
 
+import html
 import http.server
 import socketserver
 import threading
@@ -37,7 +38,9 @@ class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
             if OAuthCallbackHandler.error:
-                error_description = query_params.get("error_description", ["Unknown error"])[0]
+                error_description = html.escape(
+                    query_params.get("error_description", ["Unknown error"])[0]
+                )
                 html_content = f"""
                 <html>
                 <head>

@@ -70,7 +70,7 @@ mergeable.
 1. Fork the repository and create a feature branch off `main`.
 2. Make your changes, including tests where applicable.
 3. Ensure `pytest`, `black`, and `mypy` all pass locally. CI runs the same
-   three against Python 3.10, 3.11, and 3.12.
+   three against Python 3.10 through 3.14.
 4. Open a pull request against `main` with a clear description of the change.
 5. Reference any related GitHub issue (e.g., `Fixes #123`).
 

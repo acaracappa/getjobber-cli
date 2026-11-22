@@ -1,6 +1,7 @@
 """Token storage and management for GetJobber CLI."""
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -94,7 +95,9 @@ class TokenManager:
             else:
                 # Fallback to a permissions-protected file (not encrypted)
                 self._ensure_config_dir()
-                with open(self.credentials_file, "w") as f:
+                with open(
+                    self.credentials_file, "w", opener=lambda p, fl: os.open(p, fl, 0o600)
+                ) as f:
                     f.write(token_json)
                 # Set strict permissions
                 self.credentials_file.chmod(0o600)

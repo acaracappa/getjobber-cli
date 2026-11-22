@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] — 2026-11-22
+
+### Security
+- The OAuth callback page HTML-escapes `error_description`. It was written into
+  the page as-is, so while `login` was waiting, a link to
+  `localhost:8888/callback` could run script in the browser.
+- `config.json` (which holds the OAuth client secret) and the fallback
+  credentials file are created owner-only. They were created with default
+  permissions and restricted a moment later.
+- `uv.lock` refreshed: `certifi` 2026.11.20 drops the emSign roots whose
+  intermediate keys were compromised (GHSA-6q48-6c7w-9gw2), and `black`
+  26.10.1 fixes its GitHub Action (GHSA-cg8m-r9f2-5wm2; dev-only, and this
+  project does not use that action).
+
+### Changed
+- Targets Jobber GraphQL API version `2026-09-25`. Its one breaking change
+  removes `signedBlobId` from `NoteAttachmentAttributes`, which this CLI does
+  not use.
+- Python 3.13 and 3.14 are tested in CI and declared as supported.
+
 ## [1.3.2] — 2026-10-11
 
 ### Removed
@@ -223,6 +243,7 @@ account; the write path is temporarily gated pending a redesign.
 - Development Status classifier upgraded from Alpha to Production/Stable.
 - README: added project context section, maintainer attribution, fixed placeholder URLs.
 
+[1.3.3]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.3.3
 [1.3.2]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.3.2
 [1.3.1]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.3.1
 [1.3.0]: https://github.com/acaracappa/getjobber-cli/releases/tag/v1.3.0
