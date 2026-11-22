@@ -30,3 +30,35 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    # Separate job so the PyPI job keeps its minimal permissions.
+    needs: build-and-publish
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Extract release notes from the changelog
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            /^## \[/ { found = index($0, "## [" v "]") == 1; next }
+            /^\[[0-9]+\.[0-9]+\.[0-9]+\]: / { found = 0 }
+            found
+          ' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "No CHANGELOG.md section for $version" >&2
+            exit 1
+          fi
+          # Reference-style links such as [1.2.0] need their definitions.
+          { echo; grep -E '^\[[0-9]+\.[0-9]+\.[0-9]+\]: ' CHANGELOG.md; } >> notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md
