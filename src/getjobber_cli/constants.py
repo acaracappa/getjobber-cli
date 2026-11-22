@@ -13,7 +13,7 @@ OAUTH_TOKEN_URL = "https://api.getjobber.com/api/oauth/token"
 # months and stays accessible for up to 18 months from its release date, after
 # which requests are silently upgraded to the oldest supported version. Check
 # https://developer.getjobber.com/docs/changelog/ before bumping.
-API_VERSION = "2026-05-12"
+API_VERSION = "2026-09-25"
 
 # OAuth Configuration
 DEFAULT_REDIRECT_URI = "http://localhost:8888/callback"

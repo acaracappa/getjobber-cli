@@ -90,6 +90,16 @@ class TestCallbackHandler:
         assert resp.status_code == 200
         assert "Authentication Failed" in resp.text
 
+    def test_error_description_is_html_escaped(self, server):
+        srv, port = server
+        resp = requests.get(
+            f"http://localhost:{port}{CALLBACK_PATH}",
+            params={"error": "x", "error_description": "<script>alert(1)</script>"},
+            timeout=2,
+        )
+        assert "<script>" not in resp.text
+        assert "&lt;script&gt;" in resp.text
+
     def test_404_for_other_paths(self, server):
         srv, port = server
         resp = requests.get(f"http://localhost:{port}/bogus", timeout=2)
